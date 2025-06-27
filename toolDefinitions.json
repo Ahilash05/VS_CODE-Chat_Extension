@@ -1,0 +1,42 @@
+{
+  "Greeting": {
+    "name": "Greeting",
+    "description": "Greets a user using their name and ensures hospitality.",
+    "parameters": {
+      "name": "string"
+    }
+  },
+  "GetModuleVersion": {
+    "name": "GetModuleVersion",
+    "description": "Retrieves the version of any installed module or program.",
+    "parameters": {
+      "moduleName": "string"
+    }
+  },
+  "GetNodeVersion": {
+    "name": "GetNodeVersion",
+    "description": "Retrieves the installed Node.js version.",
+    "parameters": {}
+  },
+  "GetPythonVersion": {
+    "name": "GetPythonVersion",
+    "description": "Retrieves the installed Python version.",
+    "parameters": {}
+  },
+  "GetJavaScriptVersion": {
+    "name": "GetJavaScriptVersion",
+    "description": "Retrieves the JavaScript (V8) version.",
+    "parameters": {}
+  },
+  "GetOSInfo": {
+    "name": "GetOSInfo",
+    "description": "Determines whether the system is running on Windows or Ubuntu.",
+    "parameters": {}
+  },
+"FixErrorsInCurrentFile": {
+  "name": "FixErrorsInCurrentFile",
+  "description": "Reads the currently open file, detects syntax and logic errors, fixes them, and updates the file.",
+  "parameters": {}
+}
+
+}
