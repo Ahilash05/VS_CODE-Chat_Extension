@@ -1,0 +1,35 @@
+{
+  "id": "1751267661031_km71ackkg",
+  "name": "Untitled Thread",
+  "created": "2025-06-30T07:14:21.031Z",
+  "messages": [
+    {
+      "type": "user",
+      "content": "what is my node version?",
+      "model": "gemini",
+      "timestamp": "2025-06-30T07:14:36.681Z",
+      "id": "1751267676681_t3espi6ox"
+    },
+    {
+      "type": "assistant",
+      "content": "[TOOL_CALL:{\"name\":\"GetNodeVersion\",\"parameters\":{}}]",
+      "model": "gemini",
+      "timestamp": "2025-06-30T07:14:38.530Z",
+      "id": "1751267678530_4846sdyng"
+    },
+    {
+      "type": "user",
+      "content": "what is my python version?",
+      "model": "gemini",
+      "timestamp": "2025-06-30T07:14:54.892Z",
+      "id": "1751267694892_fnq2n6t21"
+    },
+    {
+      "type": "assistant",
+      "content": "[TOOL_CALL:{\"name\":\"GetPythonVersion\",\"parameters\":{}}]",
+      "model": "gemini",
+      "timestamp": "2025-06-30T07:14:58.086Z",
+      "id": "1751267698086_xvqb2bysd"
+    }
+  ]
+}

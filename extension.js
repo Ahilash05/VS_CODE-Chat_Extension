@@ -309,37 +309,29 @@ webview.html = getChatHtml(highlightJsUri, highlightCssUri, markedJsUri);
       this.webviewView.webview.postMessage({ command: 'streamChunk', text: chunk });
     };
 
-    const onEnd = async () => {
-      // Post-process tool calls if any
-      const toolCallRegex = /\[TOOL_CALL:({[^}]+})\]/g;
-      let match;
-      let finalResponse = fullResponse;
+   const onEnd = async (finalResponse) => {
+  const assistantMessage = {
+    type: 'assistant',
+    content: finalResponse,
+    model,
+    timestamp: new Date().toISOString()
+  };
 
-      while ((match = toolCallRegex.exec(fullResponse)) !== null) {
-        try {
-          const toolCall = JSON.parse(match[1]);
-          if (toolHandlers[toolCall.name]) {
-            const result = await toolHandlers[toolCall.name](toolCall.parameters);
-            finalResponse = finalResponse.replace(match[0], result);
-          }
-        } catch (toolErr) {
-          console.error('[Moo_LLM] Tool call error:', toolErr);
-        }
-      }
+  const responseAdded = await threadManager.addMessageToThread(threadId, assistantMessage);
+  if (!responseAdded) throw new Error('Failed to add AI response to thread');
 
-      const assistantMessage = {
-        type: 'assistant',
-        content: finalResponse,
-        model,
-        timestamp: new Date().toISOString()
-      };
+  chatHistory.addMessage(assistantMessage);
 
-      const responseAdded = await threadManager.addMessageToThread(threadId, assistantMessage);
-      if (!responseAdded) throw new Error('Failed to add AI response to thread');
+  this.webviewView.webview.postMessage({
+    command: 'response',
+    text: finalResponse
+  });
 
-      chatHistory.addMessage(assistantMessage);
-      this.webviewView.webview.postMessage({ command: 'streamEnd' });
-    };
+  this.webviewView.webview.postMessage({ command: 'streamEnd' });
+};
+
+
+
 
     if (model === 'gemini') {
       await askGemini(userInput, onChunk, onEnd);

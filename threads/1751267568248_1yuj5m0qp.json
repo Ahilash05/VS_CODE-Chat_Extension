@@ -1,0 +1,21 @@
+{
+  "id": "1751267568248_1yuj5m0qp",
+  "name": "Untitled Thread",
+  "created": "2025-06-30T07:12:48.248Z",
+  "messages": [
+    {
+      "type": "user",
+      "content": "What is my node version?",
+      "model": "gemini",
+      "timestamp": "2025-06-30T07:13:09.129Z",
+      "id": "1751267589129_4x6dogyhf"
+    },
+    {
+      "type": "assistant",
+      "content": "[TOOL_CALL:{\"name\":\"GetNodeVersion\",\"parameters\":{}}]",
+      "model": "gemini",
+      "timestamp": "2025-06-30T07:13:13.451Z",
+      "id": "1751267593451_6hxt7c0w1"
+    }
+  ]
+}

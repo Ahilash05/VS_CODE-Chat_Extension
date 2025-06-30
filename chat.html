@@ -6,8 +6,12 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Moo Chat</title>
   
-<!--HIGHLIGHT_CSS-->
-<!--HIGHLIGHT_JS-->
+<!-- Highlight.js CSS (dark theme) -->
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/highlight.js@11.9.0/styles/github-dark.min.css">
+
+<!-- Highlight.js JS -->
+<script src="https://cdn.jsdelivr.net/npm/highlight.js@11.9.0/lib/highlight.min.js"></script>
+
 
   <style>
     body, html {
@@ -313,6 +317,13 @@
       to { transform: rotate(360deg); }
     }
   </style>
+  <script>
+  window.addEventListener('DOMContentLoaded', () => {
+    document.querySelectorAll('pre code').forEach((block) => {
+      if (window.hljs) hljs.highlightElement(block);
+    });
+  });
+</script>
 </head>
 <body>
   <div id="chat-container">
@@ -326,7 +337,7 @@
         <button id="delete-thread-btn">Delete Thread</button>
       </div>
       <div id="chat">
-        <div class="system">Welcome to Moo Chat 🐄</div>
+        <div class="system">Welcome to Moo Chat </div>
       </div>
     </div>
 

@@ -3,6 +3,7 @@ const fs = require('fs');
 const path = require('path');
 const toolHandlers = require('./toolHandlers');
 
+
 // Load system prompt
 const systemPrompt = require('./systemPrompt');
 
@@ -51,69 +52,78 @@ async function processResponse(response) {
  * @param {(final: string) => void} onEnd - Called when output ends
  */
 async function askGemma(userInput, onChunk, onEnd) {
-  const cleanInput = userInput.replace(/\[TOOL_CALL:[^\]]*\]/g, '').trim();
-  const prompt = `${systemPrompt}\n\nUser message: ${cleanInput}`;
+  return new Promise((resolve, reject) => {
+    const OLLAMA_PATH = process.env.OLLAMA_PATH || 'ollama';
+    const MODEL_NAME = process.env.GEMMA_MODEL || 'gemma:2b';
 
-  const child = spawn(OLLAMA_PATH, ['run', MODEL_NAME], {
-    stdio: ['pipe', 'pipe', 'pipe']
-  });
+    const cleanInput = userInput.replace(/\[TOOL_CALL:[^\]]*\]/g, '').trim();
+    const prompt = `${systemPrompt}\n\nUser message: ${cleanInput}`;
 
-  let fullOutput = '';
-  let buffer = '';
-  let errorOutput = '';
-  let isStreaming = false;
+    const child = spawn(OLLAMA_PATH, ['run', MODEL_NAME], {
+      stdio: ['pipe', 'pipe', 'pipe']
+    });
 
-  console.log(`[Moo_LLM] Running Gemma model: ${MODEL_NAME}`);
+    let fullOutput = '';
+    let buffer = '';
+    let errorOutput = '';
+    let isStreaming = false;
 
-  // Stream characters one by one from buffer
-  const streamChars = () => {
-    if (isStreaming || buffer.length === 0) return;
-    isStreaming = true;
+    const streamChars = () => {
+      if (isStreaming || buffer.length === 0) return;
+      isStreaming = true;
 
-    const chars = buffer.split('');
-    buffer = ''; // clear buffer so new data can accumulate
+      const chars = buffer.split('');
+      buffer = '';
 
-    let index = 0;
-    const interval = setInterval(() => {
-      if (index >= chars.length) {
-        clearInterval(interval);
-        isStreaming = false;
-        streamChars(); // check for new buffered data
-        return;
-      }
-      const char = chars[index++];
-      fullOutput += char;
-      if (onChunk) onChunk(char);
-    }, 5); // control character speed here (ms)
-  };
+      let index = 0;
+      const interval = setInterval(() => {
+        if (index >= chars.length) {
+          clearInterval(interval);
+          isStreaming = false;
+          streamChars();
+          return;
+        }
 
-  child.stdout.on('data', (data) => {
-    buffer += data.toString();
-    streamChars(); // trigger character output
-  });
-
-  child.stderr.on('data', (data) => {
-    errorOutput += data.toString();
-    console.error(`[Moo_LLM] Gemma stderr: ${data.toString()}`);
-  });
-
-  child.on('error', (err) => {
-    console.error('[Moo_LLM] Failed to start Ollama:', err);
-  });
-
-  child.on('close', () => {
-    const waitUntilDone = () => {
-      if (isStreaming || buffer.length > 0) {
-        setTimeout(waitUntilDone, 10);
-      } else {
-        processResponse(fullOutput.trim()).then(onEnd);
-      }
+        const char = chars[index++];
+        fullOutput += char;
+        if (onChunk) onChunk(char);
+      }, 5);
     };
-    waitUntilDone();
-  });
 
-  child.stdin.write(prompt);
-  child.stdin.end();
+    child.stdout.on('data', (data) => {
+      buffer += data.toString();
+      streamChars();
+    });
+
+    child.stderr.on('data', (data) => {
+      errorOutput += data.toString();
+      console.error(`[Gemma stderr]: ${data.toString()}`);
+    });
+
+    child.on('error', (err) => {
+      console.error('[Gemma Error]:', err);
+      reject(err);
+    });
+
+    child.on('close', () => {
+      const waitUntilDone = () => {
+        if (isStreaming || buffer.length > 0) {
+          setTimeout(waitUntilDone, 10);
+        } else {
+          processResponse(fullOutput.trim()).then((final) => {
+            if (onEnd) onEnd(final);
+            resolve(final); // ✅ Send final string back to toolHandlers
+          }).catch((err) => {
+            reject(err);
+          });
+        }
+      };
+      waitUntilDone();
+    });
+
+    child.stdin.write(prompt);
+    child.stdin.end();
+  });
 }
 
 

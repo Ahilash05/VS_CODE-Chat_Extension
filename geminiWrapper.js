@@ -1,7 +1,9 @@
 const { GoogleGenerativeAI } = require('@google/generative-ai');
 const fs = require('fs');
 const path = require('path');
-const toolHandlers = require('./toolHandlers');
+
+
+
 
 const systemPrompt = require('./systemPrompt');
 
@@ -23,26 +25,30 @@ function initGeminiClient() {
 }
 
 async function processResponse(response) {
+  const toolHandlers = require('./toolHandlers');
   const toolCallMatch = response.match(/\[TOOL_CALL:([\s\S]*?)\]/);
 
   if (toolCallMatch) {
     try {
-      const toolCall = JSON.parse(toolCallMatch[1]);
-      const toolFn = toolHandlers[toolCall.name];
+      const toolCall = JSON.parse(toolCallMatch[1]); // ✅ parse it first
 
+      const toolFn = toolHandlers[toolCall.name];
       if (typeof toolFn === 'function') {
-        return await toolFn(toolCall.parameters || {});
+        const result = await toolFn(toolCall.parameters || {});
+        return response.replace(toolCallMatch[0], result);
       }
 
-      return `Tool "${toolCall.name}" not found.`;
+      return response.replace(toolCallMatch[0], `Tool "${toolCall.name}" not found.`);
     } catch (error) {
       console.error('[Moo_LLM] Error processing tool call:', error);
-      return `Error processing tool call: ${error.message}`;
+      return response.replace(toolCallMatch[0], `Error processing tool call: ${error.message}`);
     }
   }
 
   return response;
 }
+
+
 
 /**
  * Send a request to the Gemini API with simulated character streaming.
@@ -51,58 +57,56 @@ async function processResponse(response) {
  * @param {(final: string) => void} onEnd - Called once after the stream ends
  */
 async function askGemini(userInput, onChunk, onEnd) {
-  try {
-    const model = initGeminiClient();
-    const prompt = `${systemPrompt}\n\nUser message: ${userInput}`;
+  return new Promise(async (resolve, reject) => {
+    try {
+      const model = initGeminiClient();
+      const isToolCall = userInput.includes('--- START CODE ---') && userInput.includes('--- END CODE ---');
+      const prompt = isToolCall ? userInput : `${systemPrompt}\n\nUser message: ${userInput}`;
 
-    const result = await model.generateContentStream({
-      contents: [{ role: 'user', parts: [{ text: prompt }] }],
-      generationConfig: {
-        temperature: 0.7,
-        topK: 40,
-        topP: 0.95,
-        maxOutputTokens: 1024
-      },
-      safetySettings: [
-        {
-          category: 'HARM_CATEGORY_HARASSMENT',
-          threshold: 'BLOCK_MEDIUM_AND_ABOVE'
+      const result = await model.generateContentStream({
+        contents: [{ role: 'user', parts: [{ text: prompt }] }],
+        generationConfig: {
+          temperature: 0.7,
+          topK: 40,
+          topP: 0.95,
+          maxOutputTokens: 1024
         },
-        {
-          category: 'HARM_CATEGORY_HATE_SPEECH',
-          threshold: 'BLOCK_MEDIUM_AND_ABOVE'
-        },
-        {
-          category: 'HARM_CATEGORY_SEXUALLY_EXPLICIT',
-          threshold: 'BLOCK_MEDIUM_AND_ABOVE'
-        },
-        {
-          category: 'HARM_CATEGORY_DANGEROUS_CONTENT',
-          threshold: 'BLOCK_MEDIUM_AND_ABOVE'
-        }
-      ]
-    });
+        safetySettings: [
+          { category: 'HARM_CATEGORY_HARASSMENT', threshold: 'BLOCK_MEDIUM_AND_ABOVE' },
+          { category: 'HARM_CATEGORY_HATE_SPEECH', threshold: 'BLOCK_MEDIUM_AND_ABOVE' },
+          { category: 'HARM_CATEGORY_SEXUALLY_EXPLICIT', threshold: 'BLOCK_MEDIUM_AND_ABOVE' },
+          { category: 'HARM_CATEGORY_DANGEROUS_CONTENT', threshold: 'BLOCK_MEDIUM_AND_ABOVE' }
+        ]
+      });
 
-    let fullResponse = '';
+      let fullResponse = '';
 
-    for await (const chunk of result.stream) {
-      const text = chunk.text();
-      if (text) {
-        const chars = text.split('');
-        for (const char of chars) {
-          await new Promise(r => setTimeout(r, 5)); // typing speed per character
-          fullResponse += char;
-          if (onChunk) onChunk(char);
+      for await (const chunk of result.stream) {
+        const text = chunk.text();
+        if (text) {
+          fullResponse += text;
+
+          // Stream only non-tool-call content
+          if (!text.includes('[TOOL_CALL:')) {
+            const chars = text.split('');
+            for (const char of chars) {
+              await new Promise(r => setTimeout(r, 5));
+              if (onChunk) onChunk(char);
+            }
+          }
         }
       }
-    }
 
-    const processed = await processResponse(fullResponse);
-    if (onEnd) onEnd(processed);
-  } catch (error) {
-    console.error('[Moo_LLM] Error calling Gemini API (stream):', error);
-    throw new Error(`Error calling Gemini API: ${error.message}`);
-  }
+      const processed = await processResponse(fullResponse);
+      if (onEnd) onEnd(processed);
+      resolve(processed); 
+
+    } catch (error) {
+      console.error('[Moo_LLM] Error calling Gemini API (stream):', error);
+      reject(new Error(`Error calling Gemini API: ${error.message}`));
+    }
+  });
 }
+
 
 module.exports = askGemini;

@@ -1,0 +1,21 @@
+{
+  "id": "1751276787940_85jmnqct7",
+  "name": "Untitled Thread",
+  "created": "2025-06-30T09:46:27.941Z",
+  "messages": [
+    {
+      "type": "user",
+      "content": "fix the error in the file opened",
+      "model": "gemini",
+      "timestamp": "2025-06-30T09:46:43.935Z",
+      "id": "1751276803935_8s1b2xswc"
+    },
+    {
+      "type": "assistant",
+      "content": "Fixed errors in: **c:\\Users\\DELL\\OneDrive\\Desktop\\html\\index.cpp**\n\n```c\n#include<iostream>\nusing namespace std;\n\nint main(){\n\n    cout<<\"Hello World!\";\n    return 0;\n}\n```",
+      "model": "gemini",
+      "timestamp": "2025-06-30T09:46:51.268Z",
+      "id": "1751276811268_tr8so69ej"
+    }
+  ]
+}

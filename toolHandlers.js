@@ -2,6 +2,8 @@ const { execSync } = require('child_process');
 const os = require('os');
 const path = require('path');
 const vscode = require('vscode');
+const askModel = require('./geminiWrapper');
+
 
 module.exports = {
   Greeting: ({ name }) => {
@@ -85,24 +87,21 @@ module.exports = {
     const isUbuntu = platform === 'linux' && os.release().toLowerCase().includes('ubuntu');
     
     if (isWindows) {
-      return 'Running on Windows';
+      return 'You are currently Running on Windows';
     } else if (isUbuntu) {
-      return 'Running on Ubuntu';
+      return 'You are currently Running on Ubuntu';
     } else {
-      return `Running on ${platform}`;
+      return `You are currently Running on ${platform}`;
     }
   },
 
  FixErrorsInCurrentFile: async () => {
   const editor = vscode.window.activeTextEditor;
-  if (!editor) return ' No file is currently open in the editor.';
+  if (!editor) return 'No file is currently open in the editor.';
 
   const document = editor.document;
   const fileName = document.fileName;
   const originalText = document.getText();
-
-  // Choose your model wrapper
-  const askModel = require('./gemmaWrapper'); // or './geminiWrapper'
 
   const prompt = `
 You are an industry level development code expert. The following file contains syntax or logical errors. Fix all errors and return ONLY the corrected version of the entire file. Do not include explanations, comments, or markdown formatting.
@@ -115,21 +114,24 @@ ${originalText}
   try {
     const fixedCode = await askModel(prompt);
 
-    // Replace the full document
+    if (!fixedCode || typeof fixedCode !== 'string') {
+      return 'Error: Model returned no fixed code.';
+    }
+
     const edit = new vscode.WorkspaceEdit();
     const fullRange = new vscode.Range(
       document.positionAt(0),
       document.positionAt(originalText.length)
     );
+
     edit.replace(document.uri, fullRange, fixedCode);
     await vscode.workspace.applyEdit(edit);
     await document.save();
 
-    return ` Fixed errors in: **${fileName}**\n\n\`\`\`c\n${fixedCode.trim()}\n\`\`\``;
+    return `Fixed errors in: **${fileName}**\n\n\`\`\`c\n${fixedCode.trim()}\n\`\`\``;
   } catch (err) {
-    return ` Error fixing file: ${err.message}`;
+    return `Error fixing file: ${err.message}`;
   }
 }
-
 
 };

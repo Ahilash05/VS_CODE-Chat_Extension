@@ -16,7 +16,7 @@
   ],
   "contributes": {
     "viewsContainers": {
-      "panel": [
+      "activitybar": [
         {
           "id": "moollm-chat-panel-container",
           "title": "Moo_LLM",

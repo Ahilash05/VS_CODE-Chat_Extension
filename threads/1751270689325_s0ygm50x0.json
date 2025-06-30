@@ -1,0 +1,21 @@
+{
+  "id": "1751270689325_s0ygm50x0",
+  "name": "Untitled Thread",
+  "created": "2025-06-30T08:04:49.325Z",
+  "messages": [
+    {
+      "type": "user",
+      "content": "fix the errors in the file opened",
+      "model": "gemini",
+      "timestamp": "2025-06-30T08:05:17.083Z",
+      "id": "1751270717083_mgmeecn52"
+    },
+    {
+      "type": "assistant",
+      "content": "Tool \"FixErrorsInCurrentFile\" not found.",
+      "model": "gemini",
+      "timestamp": "2025-06-30T08:05:19.561Z",
+      "id": "1751270719561_zydzithe4"
+    }
+  ]
+}
