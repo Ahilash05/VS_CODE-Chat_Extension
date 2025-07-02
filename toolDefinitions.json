@@ -6,28 +6,13 @@
       "name": "string"
     }
   },
-  "GetModuleVersion": {
+ "GetModuleVersion": {
     "name": "GetModuleVersion",
-    "description": "Retrieves the version of any installed module or program.",
+    "description": "Intelligently determines and executes the correct version command for any installed module, program, or software using AI assistance.",
     "parameters": {
-      "moduleName": "string"
+        "moduleName": "string"
     }
-  },
-  "GetNodeVersion": {
-    "name": "GetNodeVersion",
-    "description": "Retrieves the installed Node.js version.",
-    "parameters": {}
-  },
-  "GetPythonVersion": {
-    "name": "GetPythonVersion",
-    "description": "Retrieves the installed Python version.",
-    "parameters": {}
-  },
-  "GetJavaScriptVersion": {
-    "name": "GetJavaScriptVersion",
-    "description": "Retrieves the JavaScript (V8) version.",
-    "parameters": {}
-  },
+},
   "GetOSInfo": {
     "name": "GetOSInfo",
     "description": "Determines whether the system is running on Windows or Ubuntu.",

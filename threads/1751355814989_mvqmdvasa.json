@@ -1,0 +1,28 @@
+{
+  "id": "1751355814989_mvqmdvasa",
+  "name": "Untitled Thread",
+  "created": "2025-07-01T07:43:34.989Z",
+  "messages": [
+    {
+      "type": "user",
+      "content": "fix the errors in the file opened",
+      "model": "gemini",
+      "timestamp": "2025-07-01T07:43:46.494Z",
+      "id": "1751355826495_3srtr1uov"
+    },
+    {
+      "type": "assistant",
+      "content": "[object Object]",
+      "model": "gemini",
+      "timestamp": "2025-07-01T07:43:56.016Z",
+      "id": "1751355836016_opj4h6c4c"
+    },
+    {
+      "type": "user",
+      "content": "fix errors in the file opened",
+      "model": "gemini",
+      "timestamp": "2025-07-01T09:29:20.335Z",
+      "id": "1751362160336_de772j3vg"
+    }
+  ]
+}

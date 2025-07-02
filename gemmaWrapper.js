@@ -1,7 +1,6 @@
 const { spawn } = require('child_process');
 const fs = require('fs');
 const path = require('path');
-const toolHandlers = require('./toolHandlers');
 
 
 // Load system prompt
@@ -16,34 +15,7 @@ const toolDefinitions = JSON.parse(
 const MODEL_NAME = process.env.GEMMA_MODEL || 'gemma:2b';
 const OLLAMA_PATH = process.env.OLLAMA_PATH || 'ollama';
 
-/**
- * Process the Gemma response to extract and handle tool calls
- * @param {string} response - The raw response from Gemma
- * @returns {Promise<string>} - The processed response
- */
-async function processResponse(response) {
-  const toolCallMatch = response.match(/\[TOOL_CALL:([\s\S]*?)\]/);
 
-  if (toolCallMatch) {
-    try {
-      const toolCall = JSON.parse(toolCallMatch[1]);
-      const toolFn = toolHandlers[toolCall.name];
-
-      if (typeof toolFn === 'function') {
-        const result = await toolFn(toolCall.parameters || {});
-        return response.replace(toolCallMatch[0], result);
-      }
-
-      console.log('[Moo_LLM] Tool not found, fetching from Ollama fallback');
-      return await fetchFromOllama(response.replace(toolCallMatch[0], ''));
-    } catch (error) {
-      console.error('[Moo_LLM] Error processing tool call:', error);
-      return await fetchFromOllama(response.replace(toolCallMatch[0], ''));
-    }
-  }
-
-  return response;
-}
 
 /**
  * Send a request to the local Gemma model via Ollama with streaming.
@@ -110,12 +82,10 @@ async function askGemma(userInput, onChunk, onEnd) {
         if (isStreaming || buffer.length > 0) {
           setTimeout(waitUntilDone, 10);
         } else {
-          processResponse(fullOutput.trim()).then((final) => {
-            if (onEnd) onEnd(final);
-            resolve(final); // ✅ Send final string back to toolHandlers
-          }).catch((err) => {
-            reject(err);
-          });
+          // Don't process tool calls here - let extension.js handle it
+          const final = fullOutput.trim();
+          if (onEnd) onEnd(final);
+          resolve(final);
         }
       };
       waitUntilDone();

@@ -367,7 +367,8 @@
   let currentThreadId = null;
   let availableThreads = [];
   let isLoading = false;
-  let currentStreamDiv = null; // For streaming
+  let currentStreamDiv = null;
+  let streamingBuffer = '';
 
   window.addEventListener('DOMContentLoaded', () => {
     deleteThreadBtn.addEventListener('click', () => {
@@ -456,22 +457,37 @@
   }
 
   function updateStreamingMessage(chunk) {
-  if (!currentStreamDiv) {
-    currentStreamDiv = document.createElement('div');
-    currentStreamDiv.className = 'message bot';
-    currentStreamDiv.innerHTML = '';
-    chat.appendChild(currentStreamDiv);
+    if (!currentStreamDiv) {
+      currentStreamDiv = document.createElement('div');
+      currentStreamDiv.className = 'message bot';
+      currentStreamDiv.innerHTML = '';
+      chat.appendChild(currentStreamDiv);
+      streamingBuffer = '';
+    }
+
+    streamingBuffer += chunk;
+
+    // Render the entire buffer as markdown
+    currentStreamDiv.innerHTML = marked.parse(streamingBuffer);
+
+    // Re-highlight code blocks
+    currentStreamDiv.querySelectorAll('pre code').forEach(block => {
+      if (window.hljs) hljs.highlightElement(block);
+    });
+
+    chat.scrollTop = chat.scrollHeight;
   }
 
-  // Append plain text while streaming character-by-character
-  // Avoid using marked.parse() for single characters
-  const span = document.createElement('span');
-  span.textContent = chunk;
-  currentStreamDiv.appendChild(span);
-
-  chat.scrollTop = chat.scrollHeight;
-}
-
+  function applyFixToFile(encoded) {
+    const decoded = decodeURIComponent(encoded);
+    vscode.postMessage({
+      command: 'applyFix',
+      code: decoded
+    });
+    
+    // Show feedback to user
+    addSystemMessage(' Applying changes to file...');
+  }
 
   window.addEventListener('message', event => {
     const message = event.data;
@@ -497,9 +513,47 @@
       case 'response':
         addMessageToChat(message.text, 'bot');
         break;
+      case 'fixSuggestion': {
+        const div = document.createElement('div');
+        div.className = 'message bot';
+
+        // Escape HTML in the code
+        const escapedCode = message.code
+          .replace(/&/g, '&amp;')
+          .replace(/</g, '&lt;')
+          .replace(/>/g, '&gt;')
+          .replace(/"/g, '&quot;')
+          .replace(/'/g, '&#39;');
+
+        div.innerHTML = `
+          <div style="margin-bottom: 15px;">
+            <strong>🔧 Suggested Fix for:</strong> <code>${message.fileName}</code>
+          </div>
+          <div style="margin-bottom: 15px;">
+            <strong>Fixed Code:</strong>
+          </div>
+          <pre><code class="language-javascript">${escapedCode}</code></pre>
+          <button onclick="applyFixToFile(\`${encodeURIComponent(message.code)}\`)" 
+                  style="background: linear-gradient(135deg, #28a745 0%, #20c997 100%); margin-top: 10px;">
+             Apply Changes
+          </button>
+        `;
+        
+        chat.appendChild(div);
+        
+        // Highlight the code block
+        const codeBlock = div.querySelector('pre code');
+        if (window.hljs && codeBlock) {
+          hljs.highlightElement(codeBlock);
+        }
+        
+        chat.scrollTop = chat.scrollHeight;
+        break;
+      }
 
       case 'streamStart':
         currentStreamDiv = null;
+        streamingBuffer = '';
         break;
 
       case 'streamChunk':
@@ -507,20 +561,10 @@
         break;
 
       case 'streamEnd':
-  if (currentStreamDiv) {
-    const rawText = currentStreamDiv.innerText;
-    currentStreamDiv.innerHTML = marked.parse(rawText);
-
-    // Re-highlight any code blocks
-    currentStreamDiv.querySelectorAll('pre code').forEach(block => {
-      hljs.highlightElement(block);
-    });
-  }
-
-  currentStreamDiv = null;
-  isLoading = false;
-  break;
-
+        streamingBuffer = '';
+        currentStreamDiv = null;
+        isLoading = false;
+        break;
 
       case 'threadDeleted':
         if (message.threadId === currentThreadId) {

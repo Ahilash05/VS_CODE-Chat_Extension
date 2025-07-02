@@ -11,7 +11,7 @@ const toolDefinitions = JSON.parse(
   fs.readFileSync(path.join(__dirname, 'toolDefinitions.json'), 'utf-8')
 );
 
-const API_KEY = process.env.GEMINI_API_KEY || 'AIzaSyCCFvhpGUomcClNhdzr_hhEVVgm2ok1vsk';
+const API_KEY = process.env.GEMINI_API_KEY ||' AIzaSyDXhEFn3udY4fabwPWe7kbdegqDphnhn7s';
 const MODEL_NAME = 'gemini-2.5-flash';
 
 function initGeminiClient() {
@@ -24,29 +24,7 @@ function initGeminiClient() {
   }
 }
 
-async function processResponse(response) {
-  const toolHandlers = require('./toolHandlers');
-  const toolCallMatch = response.match(/\[TOOL_CALL:([\s\S]*?)\]/);
 
-  if (toolCallMatch) {
-    try {
-      const toolCall = JSON.parse(toolCallMatch[1]); // ✅ parse it first
-
-      const toolFn = toolHandlers[toolCall.name];
-      if (typeof toolFn === 'function') {
-        const result = await toolFn(toolCall.parameters || {});
-        return response.replace(toolCallMatch[0], result);
-      }
-
-      return response.replace(toolCallMatch[0], `Tool "${toolCall.name}" not found.`);
-    } catch (error) {
-      console.error('[Moo_LLM] Error processing tool call:', error);
-      return response.replace(toolCallMatch[0], `Error processing tool call: ${error.message}`);
-    }
-  }
-
-  return response;
-}
 
 
 
@@ -69,7 +47,7 @@ async function askGemini(userInput, onChunk, onEnd) {
           temperature: 0.7,
           topK: 40,
           topP: 0.95,
-          maxOutputTokens: 1024
+          maxOutputTokens: 4096
         },
         safetySettings: [
           { category: 'HARM_CATEGORY_HARASSMENT', threshold: 'BLOCK_MEDIUM_AND_ABOVE' },
@@ -97,9 +75,9 @@ async function askGemini(userInput, onChunk, onEnd) {
         }
       }
 
-      const processed = await processResponse(fullResponse);
-      if (onEnd) onEnd(processed);
-      resolve(processed); 
+     
+      if (onEnd) onEnd(fullResponse);
+      resolve(fullResponse); 
 
     } catch (error) {
       console.error('[Moo_LLM] Error calling Gemini API (stream):', error);

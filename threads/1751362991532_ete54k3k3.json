@@ -1,0 +1,21 @@
+{
+  "id": "1751362991532_ete54k3k3",
+  "name": "Untitled Thread",
+  "created": "2025-07-01T09:43:11.532Z",
+  "messages": [
+    {
+      "type": "user",
+      "content": "fix errors in the file opened",
+      "model": "gemini",
+      "timestamp": "2025-07-01T09:43:25.755Z",
+      "id": "1751363005755_4dnryiyly"
+    },
+    {
+      "type": "assistant",
+      "content": "[object Object]",
+      "model": "gemini",
+      "timestamp": "2025-07-01T09:43:34.286Z",
+      "id": "1751363014286_722j27t88"
+    }
+  ]
+}

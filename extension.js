@@ -6,6 +6,8 @@ const askGemma = require('./gemmaWrapper');
 const askGemini = require('./geminiWrapper');
 const chatHistory = require('./chatHistory');
 const threadManager = require('./threadManager');
+const CodeLensProvider = require('./codeLensProvider');
+
 
 const htmlPath = path.join(__dirname, 'chat.html');
 function getChatHtml(highlightJsUri, highlightCssUri, markedJsUri) {
@@ -24,6 +26,43 @@ const toolDefinitions = JSON.parse(
 
 function activate(context) {
   console.log('[Moo_LLM] Extension activated');
+  [{ language: 'javascript' }, { language: 'typescript' }, { language: 'python' }].map(lang => ({
+  scheme: 'file', language: lang
+})).forEach(selector => {
+  context.subscriptions.push(
+    vscode.languages.registerCodeLensProvider(selector, new CodeLensProvider())
+  );
+});
+
+  context.subscriptions.push(
+  vscode.languages.registerCodeLensProvider(
+    { scheme: 'file', language: 'javascript' },
+    new CodeLensProvider()
+  )
+);
+
+context.subscriptions.push(
+  vscode.commands.registerCommand('extension.analyzeLine', async (document, line) => {
+    vscode.window.showInformationMessage(`Analyzing line ${line + 1}...`);
+
+    const editor = vscode.window.activeTextEditor;
+    if (!editor) return;
+
+    const decoration = vscode.window.createTextEditorDecorationType({
+      after: {
+        contentText: '← Modified',
+        color: 'red',
+        margin: '0 0 0 1em'
+      }
+    });
+
+    const position = new vscode.Position(line , 0);
+    const range = new vscode.Range(position, position);
+
+    editor.setDecorations(decoration, [{ range }]);
+  })
+);
+
   const provider = new MooChatViewProvider(context.extensionUri);
   context.subscriptions.push(
     vscode.window.registerWebviewViewProvider('moollm.chatView', provider)
@@ -34,6 +73,13 @@ function activate(context) {
       vscode.commands.executeCommand('workbench.view.extension.moollm-chat-panel-container');
     })
   );
+  context.subscriptions.push(
+  vscode.commands.registerCommand('moollm.fixErrors', async () => {
+    const toolHandlers = require('./toolHandlers');
+    const result = await toolHandlers.FixErrorsInCurrentFile();
+    vscode.window.showInformationMessage(result);
+  })
+);
 
   provider.initialized = false;
 }
@@ -145,6 +191,14 @@ webview.html = getChatHtml(highlightJsUri, highlightCssUri, markedJsUri);
         case 'ask':
           await this.handleAskMessage(message);
           break;
+        case 'applyFix':
+  await toolHandlers.ApplyFixedCodeToCurrentFile(message.code);
+  this.webviewView.webview.postMessage({
+    command: 'response',
+    text: ' Changes have been applied and highlighted in the editor!'
+  });
+  break;
+
         default:
           console.warn(`[Moo_LLM] Unknown command: ${message.command}`);
       }
@@ -281,11 +335,13 @@ webview.html = getChatHtml(highlightJsUri, highlightCssUri, markedJsUri);
     }
   }
 
- async handleAskMessage(message) {
+  async handleAskMessage(message) {
   const userInput = message.text;
   const model = message.model || 'gemma';
   const threadId = this.currentThreadId;
   if (!threadId) throw new Error('No active thread');
+
+  console.log('DEBUG: userInput =', userInput);
 
   try {
     const userMessage = {
@@ -309,7 +365,84 @@ webview.html = getChatHtml(highlightJsUri, highlightCssUri, markedJsUri);
       this.webviewView.webview.postMessage({ command: 'streamChunk', text: chunk });
     };
 
-   const onEnd = async (finalResponse) => {
+    const onEnd = async (finalResponse) => {
+  console.log('DEBUG: finalResponse =', finalResponse);
+  
+  
+  const toolCallMatch = finalResponse.match(/\[TOOL_CALL:\s*(\{.*?\})\]/);
+  
+  if (toolCallMatch) {
+    try {
+      const toolCall = JSON.parse(toolCallMatch[1]);
+      const toolName = toolCall.name;
+      
+      console.log('DEBUG: Found tool call:', toolName, toolCall.parameters);
+      
+      if (toolName === 'FixErrorsInCurrentFile') {
+        const fix = await toolHandlers.FixErrorsInCurrentFile();
+        console.log('DEBUG: Fix result:', fix);
+        
+        if (fix && typeof fix === 'object' && fix.preview) {
+          this.webviewView.webview.postMessage({
+            command: 'fixSuggestion',
+            fileName: fix.fileName,
+            code: fix.preview
+          });
+          
+          const assistantMessage = {
+            type: 'assistant',
+            content: `I've analyzed your file and found some issues. Here's the suggested fix for ${fix.fileName}:\n\n\`\`\`\n${fix.preview}\n\`\`\``,
+            model,
+            timestamp: new Date().toISOString()
+          };
+          await threadManager.addMessageToThread(threadId, assistantMessage);
+          chatHistory.addMessage(assistantMessage);
+          
+          
+          this.webviewView.webview.postMessage({ command: 'streamEnd' });
+          return;
+        } else {
+          const errorMsg = typeof fix === 'string' ? fix : 'Failed to generate fix';
+          this.webviewView.webview.postMessage({
+            command: 'response',
+            text: errorMsg
+          });
+          this.webviewView.webview.postMessage({ command: 'streamEnd' });
+          return;
+        }
+      }
+
+      
+      if (toolHandlers[toolName]) {
+        const result = await toolHandlers[toolName](toolCall.parameters || {});
+        console.log('DEBUG: Tool result:', result);
+        
+        const assistantMessage = {
+          type: 'assistant',
+          content: typeof result === 'string' ? result : JSON.stringify(result),
+          model,
+          timestamp: new Date().toISOString()
+        };
+        
+        await threadManager.addMessageToThread(threadId, assistantMessage);
+        chatHistory.addMessage(assistantMessage);
+        
+        this.webviewView.webview.postMessage({
+          command: 'response',
+          text: typeof result === 'string' ? result : JSON.stringify(result)
+        });
+        
+        this.webviewView.webview.postMessage({ command: 'streamEnd' });
+        return;
+      }
+    } catch (error) {
+      console.error('Error parsing/executing tool call:', error);
+      
+    }
+  }
+  
+ 
+  console.log('DEBUG: Processing as regular response (no tool call found)');
   const assistantMessage = {
     type: 'assistant',
     content: finalResponse,
@@ -322,16 +455,9 @@ webview.html = getChatHtml(highlightJsUri, highlightCssUri, markedJsUri);
 
   chatHistory.addMessage(assistantMessage);
 
-  this.webviewView.webview.postMessage({
-    command: 'response',
-    text: finalResponse
-  });
-
+  
   this.webviewView.webview.postMessage({ command: 'streamEnd' });
 };
-
-
-
 
     if (model === 'gemini') {
       await askGemini(userInput, onChunk, onEnd);
@@ -346,7 +472,8 @@ webview.html = getChatHtml(highlightJsUri, highlightCssUri, markedJsUri);
       text: `Error using ${model}: ${err.message || 'Unknown error'}`
     });
   }
- }
+}
+
 
 }
 

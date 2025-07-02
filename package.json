@@ -12,7 +12,8 @@
   ],
   "main": "./extension.js",
   "activationEvents": [
-    "onView:moollm.chatView"
+    "onView:moollm.chatView",
+    "onLanguage:javascript"
   ],
   "contributes": {
     "viewsContainers": {
@@ -34,11 +35,30 @@
         }
       ]
     },
+    "languages": [
+      {
+        "id": "javascript",
+        "extensions": [
+          ".js"
+        ],
+        "aliases": [
+          "JavaScript"
+        ]
+      }
+    ],
     "commands": [
       {
         "command": "moollm.openChat",
         "title": "Open Moo Chat",
         "category": "Moo_LLM"
+      },
+      {
+        "command": "extension.analyzeLine",
+        "title": "Analyze Line"
+      },
+      {
+        "command": "moollm.fixErrors",
+        "title": "Fix Errors in Current File"
       }
     ]
   },
@@ -51,6 +71,7 @@
   "dependencies": {
     "@google/genai": "^1.5.1",
     "@google/generative-ai": "^0.24.1",
+    "diff": "^8.0.2",
     "highlight.js": "^11.11.1",
     "marked": "^15.0.12",
     "node-fetch": "^3.3.2"
