@@ -1,0 +1,63 @@
+{
+  "id": "1751607234097_j8l990zjl",
+  "name": "Untitled Thread",
+  "created": "2025-07-04T05:33:54.098Z",
+  "messages": [
+    {
+      "type": "user",
+      "content": "index the current open folder",
+      "model": "gemini",
+      "timestamp": "2025-07-04T05:34:21.919Z",
+      "id": "1751607261919_cpitmu7ou"
+    },
+    {
+      "type": "assistant",
+      "content": "No search query provided.",
+      "model": "gemini",
+      "timestamp": "2025-07-04T05:34:44.941Z",
+      "id": "1751607284941_ecoci9pq2"
+    },
+    {
+      "type": "user",
+      "content": "fetch me the PrintArray function",
+      "model": "gemini",
+      "timestamp": "2025-07-04T05:34:56.954Z",
+      "id": "1751607296954_hlod9qqff"
+    },
+    {
+      "type": "assistant",
+      "content": "```python\ndef PrintArray(arr):\n    \"\"\"\n    Prints the elements of an array (list) to the console.\n\n    Args:\n        arr: The array or list to be printed.\n    \"\"\"\n    print(\"Array elements:\")\n    for i, item in enumerate(arr):\n        print(f\"[{i}]: {item}\")\n\n# Example usage:\nmy_list = [10, 20, 30, 40, 50]\nPrintArray(my_list)\n\nanother_list = [\"apple\", \"banana\", \"cherry\"]\nPrintArray(another_list)\n```",
+      "model": "gemini",
+      "timestamp": "2025-07-04T05:35:03.469Z",
+      "id": "1751607303469_try6dfy1i"
+    },
+    {
+      "type": "user",
+      "content": "index the current open folder and search for printArray function",
+      "model": "gemini",
+      "timestamp": "2025-07-04T05:35:47.473Z",
+      "id": "1751607347473_lzpc0qjiz"
+    },
+    {
+      "type": "assistant",
+      "content": "🔍 Enter your query: ",
+      "model": "gemini",
+      "timestamp": "2025-07-04T05:36:09.338Z",
+      "id": "1751607369338_qwunf9foq"
+    },
+    {
+      "type": "user",
+      "content": "Function for insertion sort",
+      "model": "gemini",
+      "timestamp": "2025-07-04T05:36:26.836Z",
+      "id": "1751607386836_cu68r33bm"
+    },
+    {
+      "type": "assistant",
+      "content": "```python\ndef insertion_sort(arr):\n    \"\"\"\n    Sorts an array using the Insertion Sort algorithm.\n\n    Args:\n        arr: The list of elements to be sorted.\n\n    Returns:\n        The sorted list.\n    \"\"\"\n    n = len(arr)\n    # Traverse through 1 to n\n    for i in range(1, n):\n        key = arr[i]\n        # Move elements of arr[0..i-1], that are greater than key,\n        # to one position ahead of their current position\n        j = i - 1\n        while j >= 0 and key < arr[j]:\n            arr[j + 1] = arr[j]\n            j -= 1\n        arr[j + 1] = key\n    return arr\n\n# Example usage:\nif __name__ == \"__main__\":\n    my_list = [12, 11, 13, 5, 6]\n    print(f\"Original list: {my_list}\")\n    sorted_list = insertion_sort(my_list)\n    print(f\"Sorted list: {sorted_list}\")\n\n    my_list_2 = [64, 25, 12, 22, 11]\n    print(f\"Original list: {my_list_2}\")\n    sorted_list_2 = insertion_sort(my_list_2)\n    print(f\"Sorted list: {sorted_list_2}\")\n```",
+      "model": "gemini",
+      "timestamp": "2025-07-04T05:36:39.949Z",
+      "id": "1751607399949_v5re0g4cv"
+    }
+  ]
+}

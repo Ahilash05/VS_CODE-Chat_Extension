@@ -93,63 +93,21 @@ module.exports = {
     return `Greetings ${name}!,What can I do for you?`;
   },
 
-  GetModuleVersion: ({ moduleName }) => {
+  GetVersionCommand: ({ command }) => {
+    if (!command || typeof command !== 'string') {
+      return 'Please provide a version command to run.';
+    }
     try {
-      if (moduleName.toLowerCase() === 'node' || moduleName.toLowerCase() === 'nodejs') {
-        return `Node.js ${process.version}`;
-      }
-      if (moduleName.toLowerCase() === 'javascript' || moduleName.toLowerCase() === 'js') {
-        return `JavaScript (V8) ${process.versions.v8}`;
-      }
-      if (moduleName.toLowerCase() === 'python') {
-        try {
-          return execSync('python --version').toString().trim();
-        } catch (e) {
-          try {
-            return execSync('python3 --version').toString().trim();
-          } catch (e2) {
-            return 'Python is not installed';
-          }
-        }
-      }
-
-      const packageJsonPath = path.resolve(process.cwd(), 'node_modules', moduleName, 'package.json');
-      const packageJson = require(packageJsonPath);
-      return `${moduleName} ${packageJson.version}`;
-    } catch (npmError) {
+      let output = '';
       try {
-        return execSync(`${moduleName} --version`).toString().trim();
-      } catch (cmdError) {
-        return `Could not determine version of ${moduleName}`;
+        output = execSync(command, { encoding: 'utf8', stdio: ['pipe', 'pipe', 'pipe'] }).trim();
+      } catch (e) {
+        // Some commands only output to stderr
+        output = e.stdout?.toString().trim() || e.stderr?.toString().trim() || e.message;
       }
-    }
-  },
-
-  GetNodeVersion: () => {
-    try {
-      return `Node.js ${process.version}`;
-    } catch (error) {
-      return 'Node.js version not available';
-    }
-  },
-
-  GetPythonVersion: () => {
-    try {
-      return execSync('python --version').toString().trim();
-    } catch (e) {
-      try {
-        return execSync('python3 --version').toString().trim();
-      } catch {
-        return 'Python is not installed';
-      }
-    }
-  },
-
-  GetJavaScriptVersion: () => {
-    try {
-      return `JavaScript (V8) ${process.versions.v8}`;
-    } catch {
-      return 'JavaScript version not available';
+      return output.split('\n')[0];
+    } catch (err) {
+      return `Error running command: ${err.message}`;
     }
   },
 
@@ -339,5 +297,202 @@ ${originalText}
       console.error('Error applying fix:', error);
       vscode.window.showErrorMessage(`Failed to apply changes: ${error.message}`);
     }
+  },
+
+CreateFile: async ({ filePath, content, useCurrentDirectory = false }) => {
+    if (!filePath || content === undefined) {
+        return 'Error: filePath and content are required';
+    }
+
+    try {
+        const workspaceFolder = vscode.workspace.workspaceFolders?.[0];
+        if (!workspaceFolder) {
+            return 'Error: No workspace folder is open';
+        }
+
+        let targetPath;
+        
+        if (useCurrentDirectory) {
+            // Get the directory of the currently active file
+            const activeEditor = vscode.window.activeTextEditor;
+            if (activeEditor) {
+                const currentFileDir = path.dirname(activeEditor.document.uri.fsPath);
+                targetPath = path.join(currentFileDir, filePath);
+            } else {
+                // Fallback to workspace root if no active editor
+                targetPath = path.resolve(workspaceFolder.uri.fsPath, filePath);
+            }
+        } else {
+            // FIXED: Only create in the specified path, not both locations
+            targetPath = path.resolve(workspaceFolder.uri.fsPath, filePath);
+        }
+
+        const uri = vscode.Uri.file(targetPath);
+
+        // Create directory structure if it doesn't exist
+        const dir = path.dirname(targetPath);
+        if (!require('fs').existsSync(dir)) {
+            require('fs').mkdirSync(dir, { recursive: true });
+        }
+
+        // Check if file already exists to prevent duplicates
+        if (require('fs').existsSync(targetPath)) {
+            return `Error: File already exists: ${path.basename(filePath)}`;
+        }
+
+        // Use VSCode's WorkspaceEdit API for file creation
+        const edit = new vscode.WorkspaceEdit();
+        edit.createFile(uri, { ignoreIfExists: false, overwrite: false });
+        edit.insert(uri, new vscode.Position(0, 0), content);
+
+        const success = await vscode.workspace.applyEdit(edit);
+        
+        if (success) {
+            // Auto-open the created file
+            const document = await vscode.workspace.openTextDocument(uri);
+            await vscode.window.showTextDocument(document);
+            
+            // Return ONLY the success message with filename
+            return ` File created successfully: ${path.basename(filePath)}`;
+        } else {
+            throw new Error('Failed to apply workspace edit');
+        }
+
+    } catch (error) {
+        return `Error creating file: ${error.message}`;
+    }
+},
+
+EditFile: async ({ filePath, instructions }) => {
+  const fs = require('fs');
+  const fullPath = path.isAbsolute(filePath)
+    ? filePath
+    : path.join(vscode.workspace.workspaceFolders?.[0].uri.fsPath || '', filePath);
+
+  if (!fs.existsSync(fullPath)) return `Error: File not found at ${fullPath}`;
+  const uri = vscode.Uri.file(fullPath);
+
+  const originalText = fs.readFileSync(fullPath, 'utf-8');
+  const prompt = `
+You are a code editing assistant. Please edit the following file according to these instructions:
+
+Instructions:
+${instructions}
+
+Original file content:
+${originalText}
+
+Return ONLY the full edited content. Do not include explanations, comments, or markdown.
+`;
+
+  try {
+    const editedCode = await askModel(prompt);
+
+    const cleaned = editedCode
+      .replace(/^```[\w]*\n?/, '')
+      .replace(/\n?```$/, '')
+      .replace(/^Here's the.*?:\s*/i, '')
+      .trim();
+
+    // Compute changed lines
+    const changedLines = getActualChangedLines(originalText, cleaned) || getChangedLinesWithStructuredDiff(originalText, cleaned);
+
+    // Overwrite file
+    fs.writeFileSync(fullPath, cleaned, 'utf-8');
+
+    // Highlight if open
+    const openEditor = vscode.window.visibleTextEditors.find(e => e.document.uri.fsPath === fullPath);
+    if (openEditor && changedLines.length) {
+      const fixedLines = cleaned.split('\n');
+      const decorations = changedLines.map(line => ({
+        range: new vscode.Range(
+          new vscode.Position(line, 0),
+          new vscode.Position(line, fixedLines[line]?.length || 1)
+        )
+      }));
+
+      const highlightDecoration = vscode.window.createTextEditorDecorationType({
+        backgroundColor: 'rgba(255, 255, 0, 0.3)',
+        border: '1px solid #FFD700',
+        isWholeLine: true
+      });
+
+      openEditor.setDecorations(highlightDecoration, decorations);
+      setTimeout(() => highlightDecoration.dispose(), 8000);
+    }
+
+    return `File edited successfully: ${path.basename(filePath)} (${changedLines.length} lines changed)`;
+
+  } catch (err) {
+    return `Error editing file: ${err.message}`;
   }
+},
+
+/**
+ * Indexes all supported files in a directory, generates embeddings, stores in Faiss. No search, no popup.
+ * @param {Object} params - { directory: string }
+ */
+IndexAndSearchFaiss: async ({ directory }) => {
+  const { execSync } = require('child_process');
+  const vscode = require('vscode');
+  const path = require('path');
+  const IndexingDir = path.join(__dirname, 'Indexing');
+  let output = '';
+  // Support 'CURRENT' as the current open folder
+  let dirToIndex = directory;
+  if (directory === 'CURRENT') {
+    const workspaceFolder = vscode.workspace.workspaceFolders?.[0]?.uri.fsPath;
+    if (!workspaceFolder) return 'No workspace folder is open.';
+    dirToIndex = workspaceFolder;
+  }
+  console.log('[IndexAndSearchFaiss] Indexing directory:', dirToIndex);
+  try {
+    // 1. Parse files in directory
+    const indexScript = path.join(IndexingDir, 'index.cjs');
+    output += execSync(`node "${indexScript}" "${dirToIndex}"`, { cwd: IndexingDir, encoding: 'utf8' });
+    // 2. Generate embeddings
+    const genScript = path.join(IndexingDir, 'generateEmbedding.js');
+output += execSync(`node "${genScript}"`, { cwd: IndexingDir, encoding: 'utf8' });
+    // 3. Store in Faiss
+    const storeScript = path.join(IndexingDir, 'storeInFaiss.cjs');
+    output += execSync(`node "${storeScript}"`, { cwd: IndexingDir, encoding: 'utf8' });
+  } catch (err) {
+    return ` Error during indexing: ${err.message}\n${err.stdout?.toString() || ''}`;
+  }
+  // Notify user
+  return 'Files in the directory have been indexed. Please enter your search query.';
+},
+
+/**
+ * Searches Faiss for the given query and returns the top 3 results.
+ * @param {Object} params - { query: string }
+ */
+SearchFaiss: async ({ query }) => {
+  const { spawnSync } = require('child_process');
+  const path = require('path');
+  const IndexingDir = path.join(__dirname, 'Indexing');
+  if (!query) return 'No search query provided.';
+  try {
+    const searchScript = path.join(IndexingDir, 'searchInFaiss.cjs');
+   
+    const result = spawnSync('node', [searchScript, query], {
+  cwd: IndexingDir,
+  encoding: 'utf8',
+  maxBuffer: 1024 * 1024
+});
+    if (result.error) throw result.error;
+    
+   if (result.stderr) {
+  console.error('Search error:', result.stderr);
+  return `Error during search: ${result.stderr}`;
+}
+
+const output = result.stdout;
+const match = output.match(/🔎 Top 3 matches[\s\S]*/);
+return match ? match[0] : output;
+  } catch (err) {
+    return ` Error during search: ${err.message}`;
+  }
+},
+
 };

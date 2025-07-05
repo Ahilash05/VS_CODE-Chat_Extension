@@ -1,0 +1,21 @@
+{
+  "id": "1751606268542_rgnsy9ahf",
+  "name": "Untitled Thread",
+  "created": "2025-07-04T05:17:48.542Z",
+  "messages": [
+    {
+      "type": "user",
+      "content": "index the current open folder",
+      "model": "gemini",
+      "timestamp": "2025-07-04T05:18:24.196Z",
+      "id": "1751606304196_t69stt42h"
+    },
+    {
+      "type": "assistant",
+      "content": " Error during indexing: Command failed: node --experimental-modules \"d:\\Moo_LLM\\Indexing\\generateEmbedding.js\"\n❌ Failed to load local E5 model: Could not locate file: \"https://huggingface.co/intfloat/e5-small-v2/resolve/main/onnx/model.onnx\".\n\n✅ Loaded 2 tokens from parsed_tokens.json\n",
+      "model": "gemini",
+      "timestamp": "2025-07-04T05:18:27.602Z",
+      "id": "1751606307602_7ytnl3bwa"
+    }
+  ]
+}

@@ -20,9 +20,7 @@ function getChatHtml(highlightJsUri, highlightCssUri, markedJsUri) {
 }
 
 
-const toolDefinitions = JSON.parse(
-  fs.readFileSync(path.join(__dirname, 'toolDefinitions.json'), 'utf-8')
-);
+
 
 function activate(context) {
   console.log('[Moo_LLM] Extension activated');
@@ -412,29 +410,67 @@ webview.html = getChatHtml(highlightJsUri, highlightCssUri, markedJsUri);
         }
       }
 
+      // Add these cases to your existing tool handling logic in handleAskMessage:
+
+if (toolName === 'CreateFile' || toolName === 'EditFile' || toolName === 'ReadFile' || toolName === 'ShowDiff') {
+  const result = await toolHandlers[toolName](toolCall.parameters || {});
+  console.log('DEBUG: File operation result:', result);
+  
+  const assistantMessage = {
+    type: 'assistant',
+    content: result,
+    model,
+    timestamp: new Date().toISOString()
+  };
+  
+  await threadManager.addMessageToThread(threadId, assistantMessage);
+  chatHistory.addMessage(assistantMessage);
+  
+  this.webviewView.webview.postMessage({
+    command: 'response',
+    text: result
+  });
+  
+  this.webviewView.webview.postMessage({ command: 'streamEnd' });
+  return;
+}
+
+
       
-      if (toolHandlers[toolName]) {
-        const result = await toolHandlers[toolName](toolCall.parameters || {});
-        console.log('DEBUG: Tool result:', result);
-        
-        const assistantMessage = {
-          type: 'assistant',
-          content: typeof result === 'string' ? result : JSON.stringify(result),
-          model,
-          timestamp: new Date().toISOString()
-        };
-        
-        await threadManager.addMessageToThread(threadId, assistantMessage);
-        chatHistory.addMessage(assistantMessage);
-        
-        this.webviewView.webview.postMessage({
-          command: 'response',
-          text: typeof result === 'string' ? result : JSON.stringify(result)
-        });
-        
-        this.webviewView.webview.postMessage({ command: 'streamEnd' });
-        return;
-      }
+      // Replace the existing tool handling section in extension.js with this:
+
+if (toolHandlers[toolName]) {
+  const result = await toolHandlers[toolName](toolCall.parameters || {});
+  console.log('DEBUG: Tool result:', result);
+  
+  // Special handling for CreateFile to ensure clean response
+  let responseText = result;
+  if (toolName === 'CreateFile' && typeof result === 'string') {
+    // Extract only the success message, remove any extra content
+    responseText = result.includes('File created successfully:') 
+      ? result.split('File created successfully:')[1].split(',')[0].trim()
+      : result;
+    responseText = `File created successfully: ${responseText}`;
+  }
+  
+  const assistantMessage = {
+    type: 'assistant',
+    content: responseText,
+    model,
+    timestamp: new Date().toISOString()
+  };
+  
+  await threadManager.addMessageToThread(threadId, assistantMessage);
+  chatHistory.addMessage(assistantMessage);
+  
+  this.webviewView.webview.postMessage({
+    command: 'response',
+    text: responseText
+  });
+  
+  this.webviewView.webview.postMessage({ command: 'streamEnd' });
+  return;
+}
     } catch (error) {
       console.error('Error parsing/executing tool call:', error);
       
@@ -460,10 +496,11 @@ webview.html = getChatHtml(highlightJsUri, highlightCssUri, markedJsUri);
 };
 
     if (model === 'gemini') {
-      await askGemini(userInput, onChunk, onEnd);
-    } else {
-      await askGemma(userInput, onChunk, onEnd);
-    }
+  await askGemini(userInput, onChunk, onEnd);
+} else {
+  await askGemma(userInput, onChunk, onEnd);
+}
+
 
   } catch (err) {
     console.error(`[Moo_LLM] Error in handleAskMessage:`, err);
@@ -480,8 +517,12 @@ webview.html = getChatHtml(highlightJsUri, highlightCssUri, markedJsUri);
 async function generateThreadName(model = 'gemma') {
   const prompt = 'Generate a concise, relevant 3-word topic for a new chat thread. Only output the topic, no extra text.';
   try {
-    const name = model === 'gemini' ? await require('./geminiWrapper')(prompt) : await require('./gemmaWrapper')(prompt);
-    return name.split(/\n|\./)[0].trim();
+    if (model === 'gemini') {
+  return (await require('./geminiWrapper')(prompt)).split(/\n|\./)[0].trim();
+}  else {
+  return (await require('./gemmaWrapper')(prompt)).split(/\n|\./)[0].trim();
+}
+
   } catch (e) {
     console.error('[Moo_LLM] Error generating thread name:', e);
     return 'New AI Thread';

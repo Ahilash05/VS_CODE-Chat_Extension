@@ -2,20 +2,12 @@ const { spawn } = require('child_process');
 const fs = require('fs');
 const path = require('path');
 
-
 // Load system prompt
 const systemPrompt = require('./systemPrompt');
-
-// Load tool definitions
-const toolDefinitions = JSON.parse(
-  fs.readFileSync(path.join(__dirname, 'toolDefinitions.json'), 'utf-8')
-);
 
 // Configuration
 const MODEL_NAME = process.env.GEMMA_MODEL || 'gemma:2b';
 const OLLAMA_PATH = process.env.OLLAMA_PATH || 'ollama';
-
-
 
 /**
  * Send a request to the local Gemma model via Ollama with streaming.
@@ -36,35 +28,10 @@ async function askGemma(userInput, onChunk, onEnd) {
     });
 
     let fullOutput = '';
-    let buffer = '';
     let errorOutput = '';
-    let isStreaming = false;
-
-    const streamChars = () => {
-      if (isStreaming || buffer.length === 0) return;
-      isStreaming = true;
-
-      const chars = buffer.split('');
-      buffer = '';
-
-      let index = 0;
-      const interval = setInterval(() => {
-        if (index >= chars.length) {
-          clearInterval(interval);
-          isStreaming = false;
-          streamChars();
-          return;
-        }
-
-        const char = chars[index++];
-        fullOutput += char;
-        if (onChunk) onChunk(char);
-      }, 5);
-    };
 
     child.stdout.on('data', (data) => {
-      buffer += data.toString();
-      streamChars();
+      fullOutput += data.toString();
     });
 
     child.stderr.on('data', (data) => {
@@ -78,24 +45,38 @@ async function askGemma(userInput, onChunk, onEnd) {
     });
 
     child.on('close', () => {
-      const waitUntilDone = () => {
-        if (isStreaming || buffer.length > 0) {
-          setTimeout(waitUntilDone, 10);
-        } else {
-          // Don't process tool calls here - let extension.js handle it
-          const final = fullOutput.trim();
-          if (onEnd) onEnd(final);
-          resolve(final);
-        }
-      };
-      waitUntilDone();
+      const final = fullOutput.trim();
+      
+      
+      const hasToolCall = final.includes('[TOOL_CALL:');
+      
+      if (hasToolCall) {
+        
+        if (onEnd) onEnd(final);
+      } else {
+        
+        const chars = final.split('');
+        let index = 0;
+        
+        const streamInterval = setInterval(() => {
+          if (index >= chars.length) {
+            clearInterval(streamInterval);
+            if (onEnd) onEnd(final);
+            return;
+          }
+          
+          const char = chars[index++];
+          if (onChunk) onChunk(char);
+        }, 5);
+      }
+      
+      resolve(final);
     });
 
     child.stdin.write(prompt);
     child.stdin.end();
   });
 }
-
 
 /**
  * Check if Ollama and the model are installed.

@@ -6,11 +6,9 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Moo Chat</title>
   
-<!-- Highlight.js CSS (dark theme) -->
-<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/highlight.js@11.9.0/styles/github-dark.min.css">
+<!--HIGHLIGHT_CSS-->
+<!--HIGHLIGHT_JS-->
 
-<!-- Highlight.js JS -->
-<script src="https://cdn.jsdelivr.net/npm/highlight.js@11.9.0/lib/highlight.min.js"></script>
 
 
   <style>
@@ -317,14 +315,15 @@
       to { transform: rotate(360deg); }
     }
   </style>
-  <script>
+ 
+</head>
+ <script>
   window.addEventListener('DOMContentLoaded', () => {
     document.querySelectorAll('pre code').forEach((block) => {
       if (window.hljs) hljs.highlightElement(block);
     });
   });
 </script>
-</head>
 <body>
   <div id="chat-container">
     <div id="main-content">
@@ -347,8 +346,8 @@
       </div>
       <div id="input-area">
         <select id="model-select">
-          <option value="gemma">Gemma</option>
-          <option value="gemini">Gemini</option>
+          <option value="gemini">Gemini-2.5-Flash</option>
+          <option value="gemma">gemma</option>  
         </select>
         <textarea id="message" rows="6" placeholder="Type your message here... Press Enter to send!"></textarea>
       </div>
@@ -426,7 +425,7 @@
     div.className = `message ${type}`;
     div.innerHTML = marked.parse(markdown);
     div.querySelectorAll('pre code').forEach(block => {
-      hljs.highlightElement(block);
+      if (window.hljs) hljs.highlightElement(block);
     });
     chat.appendChild(div);
     chat.scrollTop = chat.scrollHeight;

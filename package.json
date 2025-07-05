@@ -71,9 +71,12 @@
   "dependencies": {
     "@google/genai": "^1.5.1",
     "@google/generative-ai": "^0.24.1",
+    "@mistralai/mistralai": "^1.7.3",
+    "axios": "^1.10.0",
     "diff": "^8.0.2",
     "highlight.js": "^11.11.1",
     "marked": "^15.0.12",
-    "node-fetch": "^3.3.2"
+    "node-fetch": "^3.3.2",
+    "openai": "^5.8.2"
   }
 }

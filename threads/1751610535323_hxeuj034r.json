@@ -1,0 +1,35 @@
+{
+  "id": "1751610535323_hxeuj034r",
+  "name": "Untitled Thread",
+  "created": "2025-07-04T06:28:55.323Z",
+  "messages": [
+    {
+      "type": "user",
+      "content": "index the current open folder",
+      "model": "gemini",
+      "timestamp": "2025-07-04T06:29:41.041Z",
+      "id": "1751610581041_gr8r80fve"
+    },
+    {
+      "type": "assistant",
+      "content": "Files in the directory have been indexed. Please enter your search query.",
+      "model": "gemini",
+      "timestamp": "2025-07-04T06:29:44.952Z",
+      "id": "1751610584952_vm0p3il8i"
+    },
+    {
+      "type": "user",
+      "content": "[TOOL_CALL:{\"name\":\"SearchFaiss\",\"parameters\":{\"query\":\"insertionsort function\"}}]",
+      "model": "gemini",
+      "timestamp": "2025-07-04T06:29:56.569Z",
+      "id": "1751610596569_7pvljue8x"
+    },
+    {
+      "type": "assistant",
+      "content": "Error during search: Search error: Could not locate file: \"https://huggingface.co/intfloat/e5-small-v2/resolve/main/onnx/model.onnx\".\n",
+      "model": "gemini",
+      "timestamp": "2025-07-04T06:30:15.717Z",
+      "id": "1751610615718_3u9lmzdxx"
+    }
+  ]
+}

@@ -1,0 +1,35 @@
+{
+  "id": "1751605881900_tm046qcbv",
+  "name": "Untitled Thread",
+  "created": "2025-07-04T05:11:21.900Z",
+  "messages": [
+    {
+      "type": "user",
+      "content": "Index the current open folder",
+      "model": "gemini",
+      "timestamp": "2025-07-04T05:11:34.484Z",
+      "id": "1751605894484_q0b8ygqag"
+    },
+    {
+      "type": "assistant",
+      "content": " Error during indexing: Command failed: node --experimental-modules \"d:\\Moo_LLM\\Indexing\\generateEmbedding.js\"\n❌ Failed to load local E5 model: Could not locate file: \"https://huggingface.co/intfloat/e5-small-v2/resolve/main/onnx/model.onnx\".\n\n✅ Loaded 2 tokens from parsed_tokens.json\n",
+      "model": "gemini",
+      "timestamp": "2025-07-04T05:11:40.297Z",
+      "id": "1751605900297_7davt2ow4"
+    },
+    {
+      "type": "user",
+      "content": "search for printArray function",
+      "model": "gemini",
+      "timestamp": "2025-07-04T05:13:27.168Z",
+      "id": "1751606007168_udeglityr"
+    },
+    {
+      "type": "assistant",
+      "content": " Error during indexing: Command failed: node --experimental-modules \"d:\\Moo_LLM\\Indexing\\generateEmbedding.js\"\n❌ Failed to load local E5 model: Could not locate file: \"https://huggingface.co/intfloat/e5-small-v2/resolve/main/onnx/model.onnx\".\n\n✅ Loaded 2 tokens from parsed_tokens.json\n",
+      "model": "gemini",
+      "timestamp": "2025-07-04T05:13:33.961Z",
+      "id": "1751606013961_1pcjn1x15"
+    }
+  ]
+}

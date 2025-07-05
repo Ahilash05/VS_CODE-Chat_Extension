@@ -1,0 +1,35 @@
+{
+  "id": "1751534373842_555kwx14e",
+  "name": "Untitled Thread",
+  "created": "2025-07-03T09:19:33.842Z",
+  "messages": [
+    {
+      "type": "user",
+      "content": "create a file with the code for selection sort in c++",
+      "model": "gemini",
+      "timestamp": "2025-07-03T09:20:02.450Z",
+      "id": "1751534402450_a1uo6c2bw"
+    },
+    {
+      "type": "assistant",
+      "content": "[TOOL_CALL:{\"name\":\"CreateFile\",\"parameters\":{\"filePath\":\"selection_sort.cpp\",\"content\":\"#include <iostream>\\n#include <vector>\\n\\nvoid selectionSort(std::vector<int>& arr, int n) {\\n    for (int i = 0; i < n - 1; i++) {\\n        int min_idx = i;\\n        for (int j = i + 1; j < n; j++) {\\n            if (arr[j] < arr[min_idx]) {\\n                min_idx = j;\\n            }\\n        }\\n        // Swap the found minimum element with the first element\\n        if (min_idx != i) {\\n            std::swap(arr[i], arr[min_idx]);\\n        }\\n    }\\n}\\n\\nvoid printArray(const std::vector<int>& arr, int size) {\\n    for (int i = 0; i < size; i++) {\\n        std::cout << arr[i] << \\\" \\\";\\n    }\\n    std::cout << std::endl;\\n}\\n\\nint main() {\\n    std::vector<int> arr = {64, 25, 12, 22, 11};\\n    int n = arr.size();\\n\\n    std::cout << \\\"Original array: \\\";\\n    printArray(arr, n);\\n\\n    selectionSort(arr, n);\\n\\n    std::cout << \\\"Sorted array: \\\";\\n    printArray(arr, n);\\n\\n    return 0;\\n}\\n\"}}}]",
+      "model": "gemini",
+      "timestamp": "2025-07-03T09:20:14.760Z",
+      "id": "1751534414760_75ltin2jb"
+    },
+    {
+      "type": "user",
+      "content": "create a file with selection sort code in c++",
+      "model": "gemini",
+      "timestamp": "2025-07-03T09:21:28.939Z",
+      "id": "1751534488939_g11n8ufqw"
+    },
+    {
+      "type": "assistant",
+      "content": " File created successfully: selection_sort.cpp",
+      "model": "gemini",
+      "timestamp": "2025-07-03T09:21:39.998Z",
+      "id": "1751534499998_ytuwid9h4"
+    }
+  ]
+}
