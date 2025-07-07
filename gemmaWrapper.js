@@ -10,18 +10,53 @@ const MODEL_NAME = process.env.GEMMA_MODEL || 'gemma:2b';
 const OLLAMA_PATH = process.env.OLLAMA_PATH || 'ollama';
 
 /**
+ * Format conversation history for Gemma model
+ * @param {Array} messages - Array of message objects with type, content, etc.
+ * @returns {string} - Formatted conversation string
+ */
+function formatConversationHistory(messages) {
+  if (!Array.isArray(messages) || messages.length === 0) {
+    return '';
+  }
+
+  const conversationParts = messages.map(msg => {
+    if (msg.type === 'user') {
+      return `Human: ${msg.content}`;
+    } else if (msg.type === 'assistant') {
+      return `Assistant: ${msg.content}`;
+    }
+    return '';
+  }).filter(part => part.length > 0);
+
+  return conversationParts.join('\n\n');
+}
+
+/**
  * Send a request to the local Gemma model via Ollama with streaming.
- * @param {string} userInput - The user's input message
+ * @param {string|Array} input - Either a string (legacy) or array of message objects
  * @param {(chunk: string) => void} onChunk - Called for each output chunk
  * @param {(final: string) => void} onEnd - Called when output ends
  */
-async function askGemma(userInput, onChunk, onEnd) {
+async function askGemma(input, onChunk, onEnd) {
   return new Promise((resolve, reject) => {
     const OLLAMA_PATH = process.env.OLLAMA_PATH || 'ollama';
     const MODEL_NAME = process.env.GEMMA_MODEL || 'gemma:2b';
 
-    const cleanInput = userInput.replace(/\[TOOL_CALL:[^\]]*\]/g, '').trim();
-    const prompt = `${systemPrompt}\n\nUser message: ${cleanInput}`;
+    let prompt;
+    
+    // Handle both legacy string input and new conversation history array
+    if (typeof input === 'string') {
+      // Legacy single message format
+      const cleanInput = input.replace(/\[TOOL_CALL:[^\]]*\]/g, '').trim();
+      prompt = `${systemPrompt}\n\nUser message: ${cleanInput}`;
+    } else if (Array.isArray(input)) {
+      // New conversation history format
+      const conversationHistory = formatConversationHistory(input);
+      prompt = `${systemPrompt}\n\nConversation History:\n${conversationHistory}\n\nPlease respond to the latest message in the conversation above.`;
+    } else {
+      reject(new Error('Invalid input format: expected string or array'));
+      return;
+    }
 
     const child = spawn(OLLAMA_PATH, ['run', MODEL_NAME], {
       stdio: ['pipe', 'pipe', 'pipe']
@@ -47,14 +82,11 @@ async function askGemma(userInput, onChunk, onEnd) {
     child.on('close', () => {
       const final = fullOutput.trim();
       
-      
       const hasToolCall = final.includes('[TOOL_CALL:');
       
       if (hasToolCall) {
-        
         if (onEnd) onEnd(final);
       } else {
-        
         const chars = final.split('');
         let index = 0;
         

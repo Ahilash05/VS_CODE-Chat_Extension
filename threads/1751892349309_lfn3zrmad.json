@@ -1,0 +1,35 @@
+{
+  "id": "1751892349309_lfn3zrmad",
+  "name": "Untitled Thread",
+  "created": "2025-07-07T12:45:49.309Z",
+  "messages": [
+    {
+      "type": "user",
+      "content": "hello there",
+      "model": "gemini",
+      "timestamp": "2025-07-07T12:45:57.522Z",
+      "id": "1751892357522_uli5zb8rm"
+    },
+    {
+      "type": "assistant",
+      "content": "Hello! How can I help you today?",
+      "model": "gemini",
+      "timestamp": "2025-07-07T12:46:00.360Z",
+      "id": "1751892360360_3sg81s52a"
+    },
+    {
+      "type": "user",
+      "content": "fetch the insertion sort",
+      "model": "gemini",
+      "timestamp": "2025-07-07T12:46:13.588Z",
+      "id": "1751892373588_bjqyviai1"
+    },
+    {
+      "type": "user",
+      "content": "fetch my node version",
+      "model": "gemini",
+      "timestamp": "2025-07-07T12:47:20.040Z",
+      "id": "1751892440040_n14m19vsf"
+    }
+  ]
+}

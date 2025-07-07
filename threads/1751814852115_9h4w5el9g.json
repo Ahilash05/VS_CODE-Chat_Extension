@@ -1,0 +1,21 @@
+{
+  "id": "1751814852115_9h4w5el9g",
+  "name": "Untitled Thread",
+  "created": "2025-07-06T15:14:12.115Z",
+  "messages": [
+    {
+      "type": "user",
+      "content": "fetch the selection sort function",
+      "model": "gemini",
+      "timestamp": "2025-07-06T15:14:24.852Z",
+      "id": "1751814864852_4r89nuzqc"
+    },
+    {
+      "type": "assistant",
+      "content": "🔎 Top matches:\n\n[1] (score: 0.2260) selection_sort (Python - c:\\Users\\DELL\\OneDrive\\Desktop\\html\\selection_sort.py)\ndef selection_sort(arr):\r\n    n = len(arr)\r\n    for i in range(n):\r\n        min_idx = i\r\n        for j in range(i + 1, n):\r\n            if arr[j] < arr[min_idx]:\r\n                min_idx = j\r\n        arr[i], arr[min_idx] = arr[min_idx], arr[i]\r\n    return arr\n\n[2] (score: 0.2941) Main (C# - c:\\Users\\DELL\\OneDrive\\Desktop\\html\\InsertionSort.cs)\npublic static void Main(string[] args)\r\n    {\r\n        int[] arr = { 12, 11, 13, 5, 6 };\r\n        Console.WriteLine(\"Original array:\");\r\n        PrintArray(arr);\r\n\r\n        Sort(arr);\r\n\r\n        Console.WriteLine(\"Sorted array:\");\r\n        PrintArray(arr);\r\n    }\n\n[3] (score: 0.3094) Sort (C# - c:\\Users\\DELL\\OneDrive\\Desktop\\html\\InsertionSort.cs)\npublic static void Sort(int[] arr)\r\n    {\r\n        int n = arr.Length;\r\n        for (int i = 1; i < n; ++i)\r\n        {\r\n            int key = arr[i];\r\n            int j = i - 1;\r\n\r\n            // Move elements of arr[0..i-1], that are\r\n            // greater than key, to one position ahead\r\n            // of their current position\r\n            while (j >= 0 && arr[j] > key)\r\n            {\r\n                arr[j + 1] = arr[j];\r\n                j = j - 1;\r\n            }\r\n            arr[j + 1] = key;\r\n        }\r\n    }\n",
+      "model": "gemini",
+      "timestamp": "2025-07-06T15:14:30.193Z",
+      "id": "1751814870193_d3b7ujcuq"
+    }
+  ]
+}

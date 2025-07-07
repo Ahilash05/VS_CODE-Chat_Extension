@@ -363,6 +363,26 @@
   const deleteThreadBtn = document.getElementById('delete-thread-btn');
   const modelSelect = document.getElementById('model-select');
 
+  function saveWebviewState() {
+  const state = {
+    currentThreadId,
+    availableThreads,
+    chatHTML: chat.innerHTML
+  };
+  vscode.setState(state);
+}
+
+function restoreWebviewState() {
+  const state = vscode.getState();
+  if (!state) return;
+
+  currentThreadId = state.currentThreadId || null;
+  availableThreads = state.availableThreads || [];
+  chat.innerHTML = state.chatHTML || '';
+  updateThreadSelect();
+}
+
+
   let currentThreadId = null;
   let availableThreads = [];
   let isLoading = false;
@@ -370,6 +390,7 @@
   let streamingBuffer = '';
 
   window.addEventListener('DOMContentLoaded', () => {
+    restoreWebviewState();
     deleteThreadBtn.addEventListener('click', () => {
       if (!currentThreadId || isLoading) return;
       vscode.postMessage({
@@ -409,6 +430,7 @@
     const id = e.target.value;
     if (id && id !== currentThreadId) {
       vscode.postMessage({ command: 'switchThread', threadId: id });
+      saveWebviewState();
     }
   };
 
@@ -429,6 +451,7 @@
     });
     chat.appendChild(div);
     chat.scrollTop = chat.scrollHeight;
+    saveWebviewState();
   }
 
   function addSystemMessage(text) {
@@ -444,6 +467,7 @@
       option.selected = thread.id === currentThreadId;
       threadSelect.appendChild(option);
     });
+    saveWebviewState();
   }
 
   function loadChatHistory(messages = []) {
@@ -453,6 +477,7 @@
       return;
     }
     messages.forEach(msg => addMessageToChat(msg.content, msg.type));
+    saveWebviewState();
   }
 
   function updateStreamingMessage(chunk) {
@@ -566,6 +591,7 @@
         break;
 
       case 'threadDeleted':
+        vscode.setState(null);
         if (message.threadId === currentThreadId) {
           currentThreadId = null;
           chat.innerHTML = '';

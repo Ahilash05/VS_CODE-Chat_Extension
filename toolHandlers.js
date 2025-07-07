@@ -88,6 +88,99 @@ function getChangedLinesWithStructuredDiff(originalText, fixedText) {
   return changedLines;
 }
 
+
+// Helper function to extract code snippets from search results
+function extractCodeSnippets(searchResult) {
+  const snippets = [];
+  
+  console.log('=== DEBUGGING SEARCH RESULT EXTRACTION ===');
+  console.log('Raw search result:', searchResult);
+  
+  // Match pattern: [1] (score: 0.1234) functionName (Language - filepath)
+  const resultPattern = /\[(\d+)\]\s*\(score:\s*([\d.]+)\)\s*(.+?)\s*\((.+?)\s*-\s*(.+?)\)\s*\n([\s\S]*?)(?=\n\[|$)/g;
+  
+  let match;
+  while ((match = resultPattern.exec(searchResult)) !== null) {
+    const [, resultNum, score, name, language, file, code] = match;
+    
+    console.log(`Found result ${resultNum}:`, {
+      name: name.trim(),
+      language: language.trim(),
+      file: file.trim(),
+      codeLength: code.trim().length
+    });
+    
+    snippets.push({
+      name: name.trim(),
+      language: language.trim(),
+      file: file.trim(),
+      code: code.trim(),
+      score: parseFloat(score)
+    });
+  }
+  
+  // Fallback: if regex doesn't work, try manual parsing
+  if (snippets.length === 0) {
+    console.log('Regex failed, trying manual parsing...');
+    
+    // Split by result markers like [1], [2], [3]
+    const parts = searchResult.split(/\n\[(\d+)\]/);
+    
+    for (let i = 1; i < parts.length; i += 2) {
+      const resultNum = parts[i];
+      const content = parts[i + 1];
+      
+      if (!content) continue;
+      
+      // Look for the pattern: (score: X.XXXX) Name (Language - File)
+      const headerMatch = content.match(/\(score:\s*([\d.]+)\)\s*(.+?)\s*\((.+?)\s*-\s*(.+?)\)/);
+      
+      if (headerMatch) {
+        const [, score, name, language, file] = headerMatch;
+        
+        // Extract code after the header line
+        const lines = content.split('\n');
+        let codeLines = [];
+        let foundHeader = false;
+        
+        for (const line of lines) {
+          if (line.includes('(score:') && line.includes(name)) {
+            foundHeader = true;
+            continue;
+          }
+          if (foundHeader && line.trim()) {
+            codeLines.push(line);
+          }
+        }
+        
+        const code = codeLines.join('\n').trim();
+        
+        if (code) {
+          console.log(`Manual parsing found result ${resultNum}:`, {
+            name: name.trim(),
+            language: language.trim(),
+            file: file.trim(),
+            codeLength: code.length
+          });
+          
+          snippets.push({
+            name: name.trim(),
+            language: language.trim(),
+            file: file.trim(),
+            code: code,
+            score: parseFloat(score)
+          });
+        }
+      }
+    }
+  }
+  
+  console.log(`Total snippets extracted: ${snippets.length}`);
+  console.log('=== END DEBUGGING ===');
+  
+  return snippets;
+}
+
 module.exports = {
   Greeting: ({ name }) => {
     return `Greetings ${name}!,What can I do for you?`;
@@ -428,71 +521,248 @@ Return ONLY the full edited content. Do not include explanations, comments, or m
   }
 },
 
-/**
- * Indexes all supported files in a directory, generates embeddings, stores in Faiss. No search, no popup.
- * @param {Object} params - { directory: string }
- */
-IndexAndSearchFaiss: async ({ directory }) => {
+
+
+
+IndexAndSearch: async ({ query, operation = "explain" }) => {
   const { execSync } = require('child_process');
   const vscode = require('vscode');
   const path = require('path');
   const IndexingDir = path.join(__dirname, 'Indexing');
-  let output = '';
-  // Support 'CURRENT' as the current open folder
-  let dirToIndex = directory;
-  if (directory === 'CURRENT') {
-    const workspaceFolder = vscode.workspace.workspaceFolders?.[0]?.uri.fsPath;
-    if (!workspaceFolder) return 'No workspace folder is open.';
-    dirToIndex = workspaceFolder;
-  }
-  console.log('[IndexAndSearchFaiss] Indexing directory:', dirToIndex);
+  
+  if (!query) return 'Please provide a search query.';
+  
+  // Get current workspace folder
+  const workspaceFolder = vscode.workspace.workspaceFolders?.[0]?.uri.fsPath;
+  if (!workspaceFolder) return 'No workspace folder is open.';
+  
+  console.log('[IndexAndSearch] Indexing directory:', workspaceFolder);
+  
   try {
-    // 1. Parse files in directory
+    // 1. Parse files in current directory
     const indexScript = path.join(IndexingDir, 'index.cjs');
-    output += execSync(`node "${indexScript}" "${dirToIndex}"`, { cwd: IndexingDir, encoding: 'utf8' });
+    execSync(`node "${indexScript}" "${workspaceFolder}"`, { cwd: IndexingDir, encoding: 'utf8' });
+    
     // 2. Generate embeddings
     const genScript = path.join(IndexingDir, 'generateEmbedding.js');
-output += execSync(`node "${genScript}"`, { cwd: IndexingDir, encoding: 'utf8' });
+    execSync(`node "${genScript}"`, { cwd: IndexingDir, encoding: 'utf8' });
+    
     // 3. Store in Faiss
     const storeScript = path.join(IndexingDir, 'storeInFaiss.cjs');
-    output += execSync(`node "${storeScript}"`, { cwd: IndexingDir, encoding: 'utf8' });
-  } catch (err) {
-    return ` Error during indexing: ${err.message}\n${err.stdout?.toString() || ''}`;
-  }
-  // Notify user
-  return 'Files in the directory have been indexed. Please enter your search query.';
-},
-
-/**
- * Searches Faiss for the given query and returns the top 3 results.
- * @param {Object} params - { query: string }
- */
-SearchFaiss: async ({ query }) => {
-  const { spawnSync } = require('child_process');
-  const path = require('path');
-  const IndexingDir = path.join(__dirname, 'Indexing');
-  if (!query) return 'No search query provided.';
-  try {
-    const searchScript = path.join(IndexingDir, 'searchInFaiss.cjs');
-   
-    const result = spawnSync('node', [searchScript, query], {
-  cwd: IndexingDir,
-  encoding: 'utf8',
-  maxBuffer: 1024 * 1024
-});
-    if (result.error) throw result.error;
+    execSync(`node "${storeScript}"`, { cwd: IndexingDir, encoding: 'utf8' });
     
-   if (result.stderr) {
-  console.error('Search error:', result.stderr);
-  return `Error during search: ${result.stderr}`;
-}
+    // 4. Search and get raw results
+    const searchScript = path.join(IndexingDir, 'searchInFaiss.cjs');
+    const searchResult = execSync(`node "${searchScript}" "${query}"`, {
+      cwd: IndexingDir,
+      encoding: 'utf8',
+      maxBuffer: 1024 * 1024
+    });
+    
+    // 5. Extract code snippets from search results
+    const codeSnippets = extractCodeSnippets(searchResult);
+    
+    if (codeSnippets.length === 0) {
+      return `No matching code found for your query.\n\nRaw search result:\n${searchResult}`;
+    }
+    
+    // 6. Create context-aware prompt based on operation type
+    let prompt;
+    
+    switch (operation.toLowerCase()) {
+      case 'refactor':
+        prompt = `
+You are a code refactoring expert. The user searched for: "${query}"
 
-const output = result.stdout;
-const match = output.match(/🔎 Top 3 matches[\s\S]*/);
-return match ? match[0] : output;
+Here are the matching code snippets from their codebase:
+
+${codeSnippets.map((snippet, index) => `
+--- Code Snippet ${index + 1} ---
+File: ${snippet.file}
+Language: ${snippet.language}
+Function: ${snippet.name}
+Score: ${snippet.score}
+
+\`\`\`${snippet.language.toLowerCase()}
+${snippet.code}
+\`\`\`
+`).join('\n')}
+
+Please refactor these code snippets to improve:
+- Code readability and maintainability
+- Performance where applicable
+- Following best practices for ${codeSnippets[0]?.language || 'the language'}
+- Removing code duplication if any
+
+Provide the refactored code with explanations of what was improved.
+`;
+        break;
+        
+      case 'debug':
+        prompt = `
+You are a debugging expert. The user searched for: "${query}"
+
+Here are the matching code snippets that may contain bugs:
+
+${codeSnippets.map((snippet, index) => `
+--- Code Snippet ${index + 1} ---
+File: ${snippet.file}
+Language: ${snippet.language}
+Function: ${snippet.name}
+
+\`\`\`${snippet.language.toLowerCase()}
+${snippet.code}
+\`\`\`
+`).join('\n')}
+
+Please analyze these code snippets and:
+1. Identify any potential bugs, errors, or issues
+2. Explain what could go wrong
+3. Provide corrected versions of the code
+4. Suggest improvements for robustness
+
+Focus on logic errors, potential runtime exceptions, and edge cases.
+`;
+        break;
+        
+      case 'optimize':
+        prompt = `
+You are a performance optimization expert. The user searched for: "${query}"
+
+Here are the matching code snippets to optimize:
+
+${codeSnippets.map((snippet, index) => `
+--- Code Snippet ${index + 1} ---
+File: ${snippet.file}
+Language: ${snippet.language}
+Function: ${snippet.name}
+
+\`\`\`${snippet.language.toLowerCase()}
+${snippet.code}
+\`\`\`
+`).join('\n')}
+
+Please optimize these code snippets for:
+- Better time complexity
+- Reduced memory usage
+- Improved algorithms where applicable
+- Language-specific optimizations
+
+Provide optimized versions with performance analysis and explanations.
+`;
+        break;
+        
+      case 'test':
+        prompt = `
+You are a test writing expert. The user searched for: "${query}"
+
+Here are the matching code snippets that need tests:
+
+${codeSnippets.map((snippet, index) => `
+--- Code Snippet ${index + 1} ---
+File: ${snippet.file}
+Language: ${snippet.language}
+Function: ${snippet.name}
+
+\`\`\`${snippet.language.toLowerCase()}
+${snippet.code}
+\`\`\`
+`).join('\n')}
+
+Please create comprehensive unit tests for these functions including:
+- Happy path test cases
+- Edge cases and boundary conditions
+- Error handling scenarios
+- Mock data where needed
+
+Use appropriate testing frameworks for ${codeSnippets[0]?.language || 'the language'}.
+`;
+        break;
+        
+      case 'document':
+        prompt = `
+You are a documentation expert. The user searched for: "${query}"
+
+Here are the matching code snippets that need documentation:
+
+${codeSnippets.map((snippet, index) => `
+--- Code Snippet ${index + 1} ---
+File: ${snippet.file}
+Language: ${snippet.language}
+Function: ${snippet.name}
+
+\`\`\`${snippet.language.toLowerCase()}
+${snippet.code}
+\`\`\`
+`).join('\n')}
+
+Please provide comprehensive documentation including:
+- Function/method descriptions
+- Parameter explanations
+- Return value documentation
+- Usage examples
+- Any important notes or warnings
+
+Use appropriate documentation format for ${codeSnippets[0]?.language || 'the language'}.
+`;
+        break;
+        
+      case 'convert':
+        prompt = `
+You are a code conversion expert. The user searched for: "${query}"
+
+Here are the code snippets to work with:
+
+${codeSnippets.map((snippet, index) => `
+--- Code Snippet ${index + 1} ---
+File: ${snippet.file}
+Language: ${snippet.language}
+Function: ${snippet.name}
+
+\`\`\`${snippet.language.toLowerCase()}
+${snippet.code}
+\`\`\`
+`).join('\n')}
+
+Please help convert or adapt these code snippets as requested. If no specific target is mentioned, provide equivalent implementations in popular languages or suggest modern alternatives.
+`;
+        break;
+        
+      default: // 'explain' or any other operation
+        prompt = `
+You are a code analysis expert. The user searched for: "${query}"
+
+Here are the matching code snippets from their codebase:
+
+${codeSnippets.map((snippet, index) => `
+--- Code Snippet ${index + 1} ---
+File: ${snippet.file}
+Language: ${snippet.language}
+Function: ${snippet.name}
+Score: ${snippet.score}
+
+\`\`\`${snippet.language.toLowerCase()}
+${snippet.code}
+\`\`\`
+`).join('\n')}
+
+Please provide a comprehensive analysis including:
+1. What each function does
+2. How they relate to the search query
+3. Key algorithms or patterns used
+4. Potential improvements or concerns
+5. How these functions might work together
+
+Be thorough in your explanation and provide actionable insights.
+`;
+    }
+
+    const aiResponse = await askModel(prompt);
+    return aiResponse || 'Unable to process the code snippets.';
+    
   } catch (err) {
-    return ` Error during search: ${err.message}`;
+    return `Error during indexing and search: ${err.message}\n${err.stdout?.toString() || ''}`;
   }
-},
+}
 
 };

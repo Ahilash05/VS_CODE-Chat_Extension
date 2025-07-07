@@ -342,6 +342,9 @@ webview.html = getChatHtml(highlightJsUri, highlightCssUri, markedJsUri);
   console.log('DEBUG: userInput =', userInput);
 
   try {
+    const thread = await threadManager.getThread(threadId);
+    const conversationHistory = thread.messages || [];
+
     const userMessage = {
       type: 'user',
       content: userInput,
@@ -349,9 +352,12 @@ webview.html = getChatHtml(highlightJsUri, highlightCssUri, markedJsUri);
       timestamp: new Date().toISOString()
     };
 
+    const fullConversation = [...conversationHistory, userMessage];
+
     const messageAdded = await threadManager.addMessageToThread(threadId, userMessage);
     if (!messageAdded) throw new Error('Failed to add user message to thread');
     chatHistory.addMessage(userMessage);
+  
 
     this.webviewView.webview.postMessage({ command: 'thinking', model, threadId });
     this.webviewView.webview.postMessage({ command: 'streamStart' });
@@ -495,11 +501,11 @@ if (toolHandlers[toolName]) {
   this.webviewView.webview.postMessage({ command: 'streamEnd' });
 };
 
-    if (model === 'gemini') {
-  await askGemini(userInput, onChunk, onEnd);
-} else {
-  await askGemma(userInput, onChunk, onEnd);
-}
+  if (model === 'gemini') {
+      await askGemini(fullConversation, onChunk, onEnd);
+    } else {
+      await askGemma(fullConversation, onChunk, onEnd);
+    }
 
 
   } catch (err) {
