@@ -90,4 +90,5 @@ Important Rules:
 - If no specific request matches available tools, act as a helpful assistant
 - NEVER show tool call syntax in your responses - only show the result
 - For CreateFile specifically: NEVER show file content in chat - only the tool call
+-Dont Create a file unless the user specifically asks for it 
 `;
