@@ -1,0 +1,28 @@
+{
+  "id": "1751609683666_dr10vrwz1",
+  "name": "Untitled Thread",
+  "created": "2025-07-04T06:14:43.666Z",
+  "messages": [
+    {
+      "type": "user",
+      "content": "Index the current open folder and let me search for functions",
+      "model": "gemini",
+      "timestamp": "2025-07-04T06:17:04.632Z",
+      "id": "1751609824632_rfbg3t4ey"
+    },
+    {
+      "type": "assistant",
+      "content": "Files in the directory have been indexed. Please enter your search query.",
+      "model": "gemini",
+      "timestamp": "2025-07-04T06:17:08.437Z",
+      "id": "1751609828437_9x2pzh95r"
+    },
+    {
+      "type": "user",
+      "content": "insertion sort",
+      "model": "gemini",
+      "timestamp": "2025-07-04T06:17:41.796Z",
+      "id": "1751609861796_p1lrze3af"
+    }
+  ]
+}

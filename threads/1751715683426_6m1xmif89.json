@@ -1,0 +1,49 @@
+{
+  "id": "1751715683426_6m1xmif89",
+  "name": "Untitled Thread",
+  "created": "2025-07-05T11:41:23.426Z",
+  "messages": [
+    {
+      "type": "user",
+      "content": "hello there",
+      "model": "gemini",
+      "timestamp": "2025-07-05T11:41:29.545Z",
+      "id": "1751715689545_bjejnflo8"
+    },
+    {
+      "type": "assistant",
+      "content": "Hello! How can I help you today?",
+      "model": "gemini",
+      "timestamp": "2025-07-05T11:41:32.326Z",
+      "id": "1751715692326_a2h28ragw"
+    },
+    {
+      "type": "user",
+      "content": "im Ahilash",
+      "model": "gemini",
+      "timestamp": "2025-07-05T11:41:37.653Z",
+      "id": "1751715697653_amdfbse0v"
+    },
+    {
+      "type": "assistant",
+      "content": "Greetings Ahilash!,What can I do for you?",
+      "model": "gemini",
+      "timestamp": "2025-07-05T11:41:39.256Z",
+      "id": "1751715699256_uexgryfyv"
+    },
+    {
+      "type": "user",
+      "content": "create a file which has the code for the most difficult leetcode probelm in c++",
+      "model": "gemini",
+      "timestamp": "2025-07-05T11:42:07.662Z",
+      "id": "1751715727663_z17rx5wgo"
+    },
+    {
+      "type": "assistant",
+      "content": " File created successfully: n_queens_solver.cpp",
+      "model": "gemini",
+      "timestamp": "2025-07-05T11:42:15.282Z",
+      "id": "1751715735282_2susz5val"
+    }
+  ]
+}

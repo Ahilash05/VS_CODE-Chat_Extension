@@ -1,0 +1,35 @@
+{
+  "id": "1751532319648_hfdfafcih",
+  "name": "Untitled Thread",
+  "created": "2025-07-03T08:45:19.648Z",
+  "messages": [
+    {
+      "type": "user",
+      "content": "create a file and write the code for selection sort",
+      "model": "gemini",
+      "timestamp": "2025-07-03T08:45:33.290Z",
+      "id": "1751532333290_nirbcsc3v"
+    },
+    {
+      "type": "assistant",
+      "content": " File created successfully: selection_sort.py",
+      "model": "gemini",
+      "timestamp": "2025-07-03T08:45:47.938Z",
+      "id": "1751532347938_q8jiyne3a"
+    },
+    {
+      "type": "user",
+      "content": "fix the errors in the file opened",
+      "model": "gemini",
+      "timestamp": "2025-07-03T08:46:17.552Z",
+      "id": "1751532377552_qwtb3uuxf"
+    },
+    {
+      "type": "assistant",
+      "content": "I've analyzed your file and found some issues. Here's the suggested fix for selection_sort.py:\n\n```\ndef selection_sort(arr):\n    n = len(arr)\n    for i in range(n):\n        min_idx = i\n        for j in range(i + 1, n):\n            if arr[j] < arr[min_idx]:\n                min_idx = j\n        arr[i], arr[min_idx] = arr[min_idx], arr[i]\n    return arr\n\nif __name__ == \"__main__\":\n    test_list = [64, 25, 12, 22, 11]\n    print(f\"Original list: {test_list}\")\n    sorted_list = selection_sort(test_list)\n    print(f\"Sorted list: {sorted_list}\")\n\n    test_list_2 = [5, 1, 4, 2, 8]\n    print(f\"Original list: {test_list_2}\")\n    sorted_list_2 = selection_sort(test_list_2)\n    print(f\"Sorted list: {sorted_list_2}\")\n```",
+      "model": "gemini",
+      "timestamp": "2025-07-03T08:46:37.509Z",
+      "id": "1751532397509_6wm7r1tw2"
+    }
+  ]
+}

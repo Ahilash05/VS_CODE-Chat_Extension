@@ -1,0 +1,35 @@
+{
+  "id": "1751429564060_hyok547l6",
+  "name": "Untitled Thread",
+  "created": "2025-07-02T04:12:44.061Z",
+  "messages": [
+    {
+      "type": "user",
+      "content": "fetch my node version",
+      "model": "gemini",
+      "timestamp": "2025-07-02T04:29:21.274Z",
+      "id": "1751430561274_x1zhbqky0"
+    },
+    {
+      "type": "assistant",
+      "content": "Node.js v22.15.1",
+      "model": "gemini",
+      "timestamp": "2025-07-02T04:29:24.124Z",
+      "id": "1751430564124_s2zkl01jz"
+    },
+    {
+      "type": "user",
+      "content": "fix the errors in the file opened",
+      "model": "gemini",
+      "timestamp": "2025-07-02T04:30:47.928Z",
+      "id": "1751430647929_0cmt1cv87"
+    },
+    {
+      "type": "assistant",
+      "content": "[object Object]",
+      "model": "gemini",
+      "timestamp": "2025-07-02T04:30:54.444Z",
+      "id": "1751430654444_obxhvzi9b"
+    }
+  ]
+}

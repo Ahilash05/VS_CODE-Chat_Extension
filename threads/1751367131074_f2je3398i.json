@@ -1,0 +1,21 @@
+{
+  "id": "1751367131074_f2je3398i",
+  "name": "Untitled Thread",
+  "created": "2025-07-01T10:52:11.075Z",
+  "messages": [
+    {
+      "type": "user",
+      "content": "fetch my node version",
+      "model": "gemini",
+      "timestamp": "2025-07-01T10:52:22.651Z",
+      "id": "1751367142651_zwrjtw0t7"
+    },
+    {
+      "type": "assistant",
+      "content": "",
+      "model": "gemini",
+      "timestamp": "2025-07-01T10:52:25.504Z",
+      "id": "1751367145504_8hlr7of84"
+    }
+  ]
+}

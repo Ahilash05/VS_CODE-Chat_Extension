@@ -1,0 +1,28 @@
+{
+  "id": "1751891632743_8jsuhi6yl",
+  "name": "Untitled Thread",
+  "created": "2025-07-07T12:33:52.743Z",
+  "messages": [
+    {
+      "type": "user",
+      "content": "edit the file thats open and add a counting sort function to it",
+      "model": "gemini",
+      "timestamp": "2025-07-07T12:34:30.973Z",
+      "id": "1751891670973_tsgwicikc"
+    },
+    {
+      "type": "assistant",
+      "content": "Error: File not found at c:\\Users\\DELL\\OneDrive\\Desktop\\html\\<current_file>",
+      "model": "gemini",
+      "timestamp": "2025-07-07T12:34:34.438Z",
+      "id": "1751891674438_a7n1ldeit"
+    },
+    {
+      "type": "user",
+      "content": "fetch the selectionsort function",
+      "model": "gemini",
+      "timestamp": "2025-07-07T12:35:23.422Z",
+      "id": "1751891723422_v6efcupfe"
+    }
+  ]
+}

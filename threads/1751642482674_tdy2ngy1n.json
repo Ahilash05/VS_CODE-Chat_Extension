@@ -1,0 +1,14 @@
+{
+  "id": "1751642482674_tdy2ngy1n",
+  "name": "Untitled Thread",
+  "created": "2025-07-04T15:21:22.674Z",
+  "messages": [
+    {
+      "type": "user",
+      "content": "hello there",
+      "model": "mistral",
+      "timestamp": "2025-07-04T15:21:35.776Z",
+      "id": "1751642495776_ufbfdzsh5"
+    }
+  ]
+}

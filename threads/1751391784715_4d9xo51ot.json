@@ -1,0 +1,63 @@
+{
+  "id": "1751391784715_4d9xo51ot",
+  "name": "Untitled Thread",
+  "created": "2025-07-01T17:43:04.715Z",
+  "messages": [
+    {
+      "type": "user",
+      "content": "hi",
+      "model": "gemini",
+      "timestamp": "2025-07-01T17:43:25.332Z",
+      "id": "1751391805332_tv0t8alho"
+    },
+    {
+      "type": "assistant",
+      "content": "Hello! How can I help you today?",
+      "model": "gemini",
+      "timestamp": "2025-07-01T17:43:29.634Z",
+      "id": "1751391809634_4j28jgqxf"
+    },
+    {
+      "type": "user",
+      "content": "fetch my node version",
+      "model": "gemini",
+      "timestamp": "2025-07-01T17:43:35.848Z",
+      "id": "1751391815848_iyyg63tsv"
+    },
+    {
+      "type": "assistant",
+      "content": "Node.js v22.15.1",
+      "model": "gemini",
+      "timestamp": "2025-07-01T17:43:38.608Z",
+      "id": "1751391818608_qkkchrhmy"
+    },
+    {
+      "type": "user",
+      "content": "hello there",
+      "model": "gemini",
+      "timestamp": "2025-07-01T17:43:47.296Z",
+      "id": "1751391827296_cktfdtdvm"
+    },
+    {
+      "type": "assistant",
+      "content": "Hello! How can I help you today?",
+      "model": "gemini",
+      "timestamp": "2025-07-01T17:43:50.476Z",
+      "id": "1751391830476_1t6x5p2ib"
+    },
+    {
+      "type": "user",
+      "content": "fix the error in the file opened",
+      "model": "gemini",
+      "timestamp": "2025-07-01T17:44:02.412Z",
+      "id": "1751391842412_bzu4sjxds"
+    },
+    {
+      "type": "assistant",
+      "content": "[object Object]",
+      "model": "gemini",
+      "timestamp": "2025-07-01T17:44:10.719Z",
+      "id": "1751391850720_3f4grwk7w"
+    }
+  ]
+}

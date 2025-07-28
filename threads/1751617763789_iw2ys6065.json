@@ -1,0 +1,35 @@
+{
+  "id": "1751617763789_iw2ys6065",
+  "name": "Untitled Thread",
+  "created": "2025-07-04T08:29:23.789Z",
+  "messages": [
+    {
+      "type": "user",
+      "content": "index the current open folder",
+      "model": "gemini",
+      "timestamp": "2025-07-04T08:29:34.611Z",
+      "id": "1751617774611_j8yagjoht"
+    },
+    {
+      "type": "assistant",
+      "content": "Files in the directory have been indexed. Please enter your search query.",
+      "model": "gemini",
+      "timestamp": "2025-07-04T08:29:44.677Z",
+      "id": "1751617784677_76naj5phf"
+    },
+    {
+      "type": "user",
+      "content": "[TOOL_CALL:{\"name\":\"SearchFaiss\",\"parameters\":{\"query\":\"insertionsort function\"}}]",
+      "model": "gemini",
+      "timestamp": "2025-07-04T08:30:45.892Z",
+      "id": "1751617845892_0t1m71vcz"
+    },
+    {
+      "type": "assistant",
+      "content": "Error during search: d:\\Moo_LLM\\Indexing\\searchInFaiss.cjs:10\r\nconst TOP_K = Math.min(3, tokenMap.length);\r\n                          ^\r\n\r\nReferenceError: Cannot access 'tokenMap' before initialization\r\n    at Object.<anonymous> (d:\\Moo_LLM\\Indexing\\searchInFaiss.cjs:10:27)\r\n    at Module._compile (node:internal/modules/cjs/loader:1529:14)\r\n    at Module._extensions..js (node:internal/modules/cjs/loader:1613:10)\r\n    at Module.load (node:internal/modules/cjs/loader:1275:32)\r\n    at Module._load (node:internal/modules/cjs/loader:1096:12)\r\n    at Function.executeUserEntryPoint [as runMain] (node:internal/modules/run_main:164:12)\r\n    at node:internal/main/run_main_module:28:49\r\n\r\nNode.js v20.19.2\r\n",
+      "model": "gemini",
+      "timestamp": "2025-07-04T08:31:07.721Z",
+      "id": "1751617867721_uokw3t7pc"
+    }
+  ]
+}

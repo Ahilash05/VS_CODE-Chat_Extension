@@ -1,0 +1,35 @@
+{
+  "id": "1751535219349_snut9xg1n",
+  "name": "Untitled Thread",
+  "created": "2025-07-03T09:33:39.350Z",
+  "messages": [
+    {
+      "type": "user",
+      "content": "create a file with code for selection sort in c++",
+      "model": "gemini",
+      "timestamp": "2025-07-03T09:34:00.423Z",
+      "id": "1751535240423_pxc5601ey"
+    },
+    {
+      "type": "assistant",
+      "content": "[TOOL_CALL:{\"name\":\"CreateFile\",\"parameters\":{\"filePath\":\"selection_sort.cpp\",\"content\":\"#include <iostream>\\n#include <vector>\\n\\nvoid selectionSort(std::vector<int>& arr, int n) {\\n    for (int i = 0; i < n - 1; i++) {\\n        int min_idx = i;\\n        for (int j = i + 1; j < n; j++) {\\n            if (arr[j] < arr[min_idx]) {\\n                min_idx = j;\\n            }\\n        }\\n        // Swap the found minimum element with the first element\\n        if (min_idx != i) {\\n            std::swap(arr[i], arr[min_idx]);\\n        }\\n    }\\n}\\n\\nvoid printArray(const std::vector<int>& arr, int size) {\\n    for (int i = 0; i < size; i++) {\\n        std::cout << arr[i] << \\\" \\\";\\n    }\\n    std::cout << std::endl;\\n}\\n\\nint main() {\\n    std::vector<int> arr = {64, 25, 12, 22, 11};\\n    int n = arr.size();\\n\\n    std::cout << \\\"Original array: \\\";\\n    printArray(arr, n);\\n\\n    selectionSort(arr, n);\\n\\n    std::cout << \\\"Sorted array: \\\";\\n    printArray(arr, n);\\n\\n    return 0;\\n}\"}}]",
+      "model": "gemini",
+      "timestamp": "2025-07-03T09:34:12.231Z",
+      "id": "1751535252231_0inxlmpo3"
+    },
+    {
+      "type": "user",
+      "content": "fix the errors in the file opened",
+      "model": "gemini",
+      "timestamp": "2025-07-03T09:36:31.356Z",
+      "id": "1751535391356_smi1awex0"
+    },
+    {
+      "type": "assistant",
+      "content": "[TOOL_CALL:{\"name\":\"FixErrorsInCurrentFile\",\"parameters\":{}}]",
+      "model": "gemini",
+      "timestamp": "2025-07-03T09:36:33.198Z",
+      "id": "1751535393198_hwb0nqk28"
+    }
+  ]
+}

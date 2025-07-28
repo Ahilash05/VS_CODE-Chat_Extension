@@ -1,0 +1,105 @@
+{
+  "id": "1751608031953_nn39kkey3",
+  "name": "Untitled Thread",
+  "created": "2025-07-04T05:47:11.953Z",
+  "messages": [
+    {
+      "type": "user",
+      "content": "index the current open folder",
+      "model": "gemini",
+      "timestamp": "2025-07-04T05:47:26.538Z",
+      "id": "1751608046538_m9dsa18tg"
+    },
+    {
+      "type": "assistant",
+      "content": "Files in the directory have been indexed. Please enter your search query.",
+      "model": "gemini",
+      "timestamp": "2025-07-04T05:47:29.460Z",
+      "id": "1751608049460_wcflpenqv"
+    },
+    {
+      "type": "user",
+      "content": "function for insertionSort",
+      "model": "gemini",
+      "timestamp": "2025-07-04T05:47:49.422Z",
+      "id": "1751608069423_0529twydx"
+    },
+    {
+      "type": "assistant",
+      "content": "```python\ndef insertion_sort(arr):\n    \"\"\"\n    Sorts an array using the Insertion Sort algorithm.\n\n    Args:\n        arr: The list of elements to be sorted.\n\n    Returns:\n        The sorted list.\n    \"\"\"\n    n = len(arr)\n    # Traverse through 1 to n-1\n    for i in range(1, n):\n        key = arr[i]\n        j = i - 1\n        \n        # Move elements of arr[0..i-1], that are greater than key,\n        # to one position ahead of their current position\n        while j >= 0 and key < arr[j]:\n            arr[j + 1] = arr[j]\n            j -= 1\n        arr[j + 1] = key\n    return arr\n\n# Example usage:\n# my_list = [12, 11, 13, 5, 6]\n# sorted_list = insertion_sort(my_list)\n# print(\"Sorted array is:\", sorted_list) # Output: Sorted array is: [5, 6, 11, 12, 13]\n```",
+      "model": "gemini",
+      "timestamp": "2025-07-04T05:48:02.051Z",
+      "id": "1751608082051_k5xbbbqwv"
+    },
+    {
+      "type": "user",
+      "content": "index the current open folder",
+      "model": "gemini",
+      "timestamp": "2025-07-04T05:48:13.232Z",
+      "id": "1751608093232_9cwzm5w8y"
+    },
+    {
+      "type": "assistant",
+      "content": "Files in the directory have been indexed. Please enter your search query.",
+      "model": "gemini",
+      "timestamp": "2025-07-04T05:48:15.334Z",
+      "id": "1751608095334_jxubyaro7"
+    },
+    {
+      "type": "user",
+      "content": "insertion sort",
+      "model": "gemini",
+      "timestamp": "2025-07-04T05:48:23.797Z",
+      "id": "1751608103797_gpqt6cos5"
+    },
+    {
+      "type": "assistant",
+      "content": "Insertion sort is a simple sorting algorithm that builds the final sorted array (or list) one item at a time. It is much less efficient on large lists than more advanced algorithms such as quicksort, heapsort, or merge sort.\n\nHere's how insertion sort works:\n\n1.  **Start from the second element:** The algorithm considers the first element to be already sorted. It then picks the next element (the second one) and compares it with the elements before it.\n2.  **Shift elements:** If the picked element is smaller than an element before it, it shifts the larger element(s) one position to the right to make space for the picked element.\n3.  **Insert:** The picked element is then inserted into its correct position in the sorted part of the array.\n4.  **Repeat:** This process is repeated for each remaining unsorted element until the entire array is sorted.\n\n**Analogy:**\nThink of sorting a hand of playing cards. You hold the cards in your hand, and they are sorted. When you pick up a new card from the table, you compare it with the cards you already have and insert it into its correct position so that your hand remains sorted.\n\n**Example:**\nLet's sort the array `[12, 11, 13, 5, 6]` using insertion sort.\n\n*   **Initial array:** `[12, 11, 13, 5, 6]`\n\n1.  **Pass 1 (Element 11):**\n    *   `12` is considered sorted.\n    *   Pick `11`. Compare `11` with `12`. `11 < 12`.\n    *   Shift `12` to the right.\n    *   Insert `11` before `12`.\n    *   Array: `[11, 12, 13, 5, 6]` (Sorted part: `[11, 12]`)\n\n2.  **Pass 2 (Element 13):**\n    *   Pick `13`. Compare `13` with `12`. `13 > 12`. No shift needed.\n    *   Insert `13` after `12`.\n    *   Array: `[11, 12, 13, 5, 6]` (Sorted part: `[11, 12, 13]`)\n\n3.  **Pass 3 (Element 5):**\n    *   Pick `5`. Compare `5` with `13`. `5 < 13`. Shift `13`.\n    *   Array: `[11, 12, _, 13, 6]`\n    *   Compare `5` with `12`. `5 < 12`. Shift `12`.\n    *   Array: `[11, _, 12, 13, 6]`\n    *   Compare `5` with `11`. `5 < 11`. Shift `11`.\n    *   Array: `[_, 11, 12, 13, 6]`\n    *   Insert `5`.\n    *   Array: `[5, 11, 12, 13, 6]` (Sorted part: `[5, 11, 12, 13]`)\n\n4.  **Pass 4 (Element 6):**\n    *   Pick `6`. Compare `6` with `13`. `6 < 13`. Shift `13`.\n    *   Array: `[5, 11, 12, _, 13]`\n    *   Compare `6` with `12`. `6 < 12`. Shift `12`.\n    *   Array: `[5, 11, _, 12, 13]`\n    *   Compare `6` with `11`. `6 < 11`. Shift `11`.\n    *   Array: `[5, _, 11, 12, 13]`\n    *   Insert `6`.\n    *   Array: `[5, 6, 11, 12, 13]` (Sorted part: `[5, 6, 11, 12, 13]`)\n\n**Characteristics:**\n\n*   **Time Complexity:**\n    *   **Best Case:** O(n) - When the array is already sorted.\n    *   **Average Case:** O(n^2)\n    *   **Worst Case:** O(n^2) - When the array is sorted in reverse order.\n*   **Space Complexity:** O(1) - It sorts in-place, requiring only a constant amount of extra memory.\n*   **Stability:** It is a stable sorting algorithm, meaning it preserves the relative order of equal elements.\n*   **Adaptability:** It is adaptive, meaning its performance improves for nearly sorted inputs.\n\n**When to use Insertion Sort:**\n\n*   For small datasets.\n*   When the data is already substantially sorted (as it performs very well in such cases).\n*   When stability is a concern.\n*   As a component of more complex algorithms, like hybrid sorting algorithms (e.g., Timsort and Introsort often use insertion sort for small partitions).",
+      "model": "gemini",
+      "timestamp": "2025-07-04T05:49:11.445Z",
+      "id": "1751608151445_n20s9bljw"
+    },
+    {
+      "type": "user",
+      "content": "index the current open folder",
+      "model": "gemini",
+      "timestamp": "2025-07-04T05:49:26.030Z",
+      "id": "1751608166031_swf9cy8e1"
+    },
+    {
+      "type": "assistant",
+      "content": "Files in the directory have been indexed. Please enter your search query.",
+      "model": "gemini",
+      "timestamp": "2025-07-04T05:49:29.597Z",
+      "id": "1751608169597_l2bi3ismm"
+    },
+    {
+      "type": "user",
+      "content": "search for insertionsort function",
+      "model": "gemini",
+      "timestamp": "2025-07-04T05:49:39.075Z",
+      "id": "1751608179075_hq5nhn6us"
+    },
+    {
+      "type": "assistant",
+      "content": "🔍 Enter your query: ",
+      "model": "gemini",
+      "timestamp": "2025-07-04T05:49:42.200Z",
+      "id": "1751608182200_fs9hdp0wb"
+    },
+    {
+      "type": "user",
+      "content": "search for insertion sort function",
+      "model": "gemini",
+      "timestamp": "2025-07-04T05:49:55.564Z",
+      "id": "1751608195564_5q34khb96"
+    },
+    {
+      "type": "assistant",
+      "content": "🔍 Enter your query: ",
+      "model": "gemini",
+      "timestamp": "2025-07-04T05:49:58.447Z",
+      "id": "1751608198447_pctiou42m"
+    }
+  ]
+}
