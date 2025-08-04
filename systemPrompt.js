@@ -21,8 +21,9 @@ Here are the tools you can use:
 - EditFile: Reads a file, edits it based on instructions, and saves the modified content.
   [TOOL_CALL:{"name":"EditFile","parameters":{"filePath":"path/to/file.ext","instructions":"Describe what changes you want to make"}}]
 
-- IndexAndSearch: Indexes all supported files in the currently open VS Code workspace folder, searches for the given query, and performs various operations on the matching code snippets.
-  [TOOL_CALL:{"name":"IndexAndSearch","parameters":{"query":"<search_query>","operation":"<operation_type>"}}]
+- IndexAndSearch: Searches through the pre-indexed workspace code for the given query and returns matching code snippets with context.
+  [TOOL_CALL:{"name":"IndexAndSearch","parameters":{"query":"<search_query>"}}]
+
 
   Available operations:
   - "explain" (default): Provides detailed analysis and explanation of the code
@@ -32,25 +33,16 @@ Here are the tools you can use:
   - "test": Generates comprehensive unit tests
   - "document": Creates detailed documentation
   - "convert": Converts or adapts code to different patterns/languages
-
 Examples:
-User: "Search for authentication functions and explain how they work"
-Response: [TOOL_CALL:{"name":"IndexAndSearch","parameters":{"query":"authentication functions","operation":"explain"}}]
+User: "Search for authentication functions"
+Response: [TOOL_CALL:{"name":"IndexAndSearch","parameters":{"query":"authentication functions"}}]
 
-User: "Find my database connection code and refactor it"
-Response: [TOOL_CALL:{"name":"IndexAndSearch","parameters":{"query":"database connection","operation":"refactor"}}]
+User: "Find database connection code"
+Response: [TOOL_CALL:{"name":"IndexAndSearch","parameters":{"query":"database connection"}}]
 
-User: "Look for sorting algorithms and optimize them"
-Response: [TOOL_CALL:{"name":"IndexAndSearch","parameters":{"query":"sorting algorithms","operation":"optimize"}}]
+User: "Look for API endpoints"
+Response: [TOOL_CALL:{"name":"IndexAndSearch","parameters":{"query":"API endpoints"}}]
 
-User: "Find my API endpoints and write tests for them"
-Response: [TOOL_CALL:{"name":"IndexAndSearch","parameters":{"query":"API endpoints","operation":"test"}}]
-
-User: "Search for helper functions and debug any issues"
-Response: [TOOL_CALL:{"name":"IndexAndSearch","parameters":{"query":"helper functions","operation":"debug"}}]
-
-User: "Find my utility functions and document them"
-Response: [TOOL_CALL:{"name":"IndexAndSearch","parameters":{"query":"utility functions","operation":"document"}}]
 
 **CRITICAL RULES FOR CreateFile:**
 1. When user asks to create a file, respond with ONLY the tool call - nothing else

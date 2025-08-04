@@ -23,7 +23,42 @@ function getChatHtml(highlightJsUri, highlightCssUri, markedJsUri) {
 
 
 function activate(context) {
+  initializeGlobalState(context);
   console.log('[Moo_LLM] Extension activated');
+
+// Auto-index workspace on activation
+context.subscriptions.push(
+  vscode.workspace.onDidChangeWorkspaceFolders(async () => {
+    await autoIndexWorkspace();
+  })
+);
+
+// Index immediately when extension activates
+setTimeout(async () => {
+  await autoIndexWorkspace();
+}, 2000); // Small delay to ensure workspace is fully loaded
+
+async function autoIndexWorkspace() {
+  const workspaceFolder = vscode.workspace.workspaceFolders?.[0]?.uri.fsPath;
+  if (!workspaceFolder) return;
+  
+  try {
+    console.log('[Moo_LLM] Auto-indexing workspace:', workspaceFolder);
+    const { execSync } = require('child_process');
+    const IndexingDir = path.join(__dirname, 'Indexing');
+    
+    // Run indexing pipeline
+    execSync(`node "${path.join(IndexingDir, 'index.cjs')}" "${workspaceFolder}"`, { cwd: IndexingDir });
+    execSync(`node "${path.join(IndexingDir, 'generateEmbedding.js')}"`, { cwd: IndexingDir });
+    execSync(`node "${path.join(IndexingDir, 'storeInFaiss.cjs')}"`, { cwd: IndexingDir });
+    
+    console.log('[Moo_LLM] Workspace indexing completed');
+  } catch (error) {
+    console.error('[Moo_LLM] Auto-indexing failed:', error);
+  }
+}
+
+
   [{ language: 'javascript' }, { language: 'typescript' }, { language: 'python' }].map(lang => ({
   scheme: 'file', language: lang
 })).forEach(selector => {
@@ -82,6 +117,35 @@ context.subscriptions.push(
   provider.initialized = false;
 }
 
+// Global state management
+let globalState = null;
+
+function initializeGlobalState(context) {
+  globalState = context.globalState;
+}
+
+function saveGlobalChatState(threadId, messages, threads) {
+  if (!globalState) return;
+  
+  const chatState = {
+    currentThreadId: threadId,
+    availableThreads: threads,
+    lastActiveTime: Date.now(),
+    messages: messages
+  };
+  
+  globalState.update('moollm.chatState', chatState);
+  console.log('[Moo_LLM] Global state saved');
+}
+
+function loadGlobalChatState() {
+  if (!globalState) return null;
+  
+  const state = globalState.get('moollm.chatState');
+  console.log('[Moo_LLM] Global state loaded:', state ? 'found' : 'not found');
+  return state;
+}
+
 class MooChatViewProvider {
   constructor(extensionUri) {
     this._extensionUri = extensionUri;
@@ -105,6 +169,9 @@ const markedJsUri = webview.asWebviewUri(vscode.Uri.joinPath(this._extensionUri,
 
 webview.html = getChatHtml(highlightJsUri, highlightCssUri, markedJsUri);
 
+
+
+
     try {
       await this.initializeThreadSystem();
       await this.updateThreadUI();
@@ -117,25 +184,42 @@ webview.html = getChatHtml(highlightJsUri, highlightCssUri, markedJsUri);
     });
   }
 
-  async initializeThreadSystem() {
-    try {
-      const existingThreads = await threadManager.listThreads();
-      if (!this.initialized || existingThreads.length === 0) {
-        console.log('[Moo_LLM] Creating initial thread...');
-        const threadId = await threadManager.createThread();
-        if (!threadId) throw new Error('Failed to create initial thread');
-        this.currentThreadId = threadId;
+async initializeThreadSystem() {
+  try {
+    // Try to restore from global state first
+    const savedState = loadGlobalChatState();
+    
+    if (savedState && savedState.currentThreadId) {
+      console.log('[Moo_LLM] Restoring from global state...');
+      
+      // Verify the saved thread still exists
+      const threadExists = await threadManager.verifyThreadExists(savedState.currentThreadId);
+      if (threadExists) {
+        this.currentThreadId = savedState.currentThreadId;
         this.initialized = true;
-        console.log(`[Moo_LLM] Created initial thread: ${threadId}`);
-      } else {
-        this.currentThreadId = existingThreads[0];
-        console.log(`[Moo_LLM] Using existing thread: ${this.currentThreadId}`);
+        console.log(`[Moo_LLM] Restored thread: ${this.currentThreadId}`);
+        return;
       }
-    } catch (error) {
-      console.error('[Moo_LLM] Error in initializeThreadSystem:', error);
-      throw error;
     }
+    
+    // Fallback to existing logic
+    const existingThreads = await threadManager.listThreads();
+    if (!this.initialized || existingThreads.length === 0) {
+      console.log('[Moo_LLM] Creating initial thread...');
+      const threadId = await threadManager.createThread();
+      if (!threadId) throw new Error('Failed to create initial thread');
+      this.currentThreadId = threadId;
+      this.initialized = true;
+      console.log(`[Moo_LLM] Created initial thread: ${threadId}`);
+    } else {
+      this.currentThreadId = existingThreads[0];
+      console.log(`[Moo_LLM] Using existing thread: ${this.currentThreadId}`);
+    }
+  } catch (error) {
+    console.error('[Moo_LLM] Error in initializeThreadSystem:', error);
+    throw error;
   }
+}
 
   async updateThreadUI() {
     if (!this.webviewView || !this.currentThreadId) {
@@ -168,6 +252,10 @@ webview.html = getChatHtml(highlightJsUri, highlightCssUri, markedJsUri);
         currentThreadId: this.currentThreadId
       });
 
+       if (thread && threads) {
+    saveGlobalChatState(this.currentThreadId, thread.messages || [], threads);
+  }
+
     } catch (error) {
       console.error('[Moo_LLM] Error updating thread UI:', error);
       vscode.window.showErrorMessage('Failed to update thread interface');
@@ -195,6 +283,21 @@ webview.html = getChatHtml(highlightJsUri, highlightCssUri, markedJsUri);
     command: 'response',
     text: ' Changes have been applied and highlighted in the editor!'
   });
+  break;
+  case 'saveState':
+  try {
+    const thread = await threadManager.getThread(this.currentThreadId);
+    const threadIds = await threadManager.listThreads();
+    const threads = await Promise.all(
+      threadIds.map(async (id) => ({
+        id,
+        description: threadManager.getThreadDescription(id)
+      }))
+    );
+    saveGlobalChatState(this.currentThreadId, thread?.messages || [], threads);
+  } catch (error) {
+    console.error('[Moo_LLM] Error saving state:', error);
+  }
   break;
 
         default:
@@ -496,6 +599,17 @@ if (toolHandlers[toolName]) {
   if (!responseAdded) throw new Error('Failed to add AI response to thread');
 
   chatHistory.addMessage(assistantMessage);
+
+  // Save state after successful message exchange
+const thread = await threadManager.getThread(threadId);
+const threadIds = await threadManager.listThreads();
+const threads = await Promise.all(
+  threadIds.map(async (id) => ({
+    id,
+    description: threadManager.getThreadDescription(id)
+  }))
+);
+saveGlobalChatState(threadId, thread.messages || [], threads);
 
   
   this.webviewView.webview.postMessage({ command: 'streamEnd' });

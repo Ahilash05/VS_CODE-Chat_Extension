@@ -367,9 +367,17 @@
   const state = {
     currentThreadId,
     availableThreads,
-    chatHTML: chat.innerHTML
+    chatHTML: chat.innerHTML,
+    selectedModel: modelSelect.value,
+    timestamp: Date.now()
   };
   vscode.setState(state);
+  
+  // Also notify extension to save global state
+  vscode.postMessage({
+    command: 'saveState',
+    state: state
+  });
 }
 
 function restoreWebviewState() {
@@ -612,6 +620,9 @@ function restoreWebviewState() {
       case 'thinking':
         isLoading = true;
         break;
+      case 'saveState':
+  // Extension will handle global state saving
+  break;
     }
   });
 </script>

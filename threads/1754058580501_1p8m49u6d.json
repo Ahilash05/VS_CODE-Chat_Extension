@@ -1,0 +1,21 @@
+{
+  "id": "1754058580501_1p8m49u6d",
+  "name": "Untitled Thread",
+  "created": "2025-08-01T14:29:40.501Z",
+  "messages": [
+    {
+      "type": "user",
+      "content": "what is hypnosis",
+      "model": "gemini",
+      "timestamp": "2025-08-01T14:30:02.141Z",
+      "id": "1754058602141_bgk5ojdft"
+    },
+    {
+      "type": "assistant",
+      "content": "Hypnosis is a state of human consciousness involving focused attention and reduced peripheral awareness and an enhanced capacity for response to suggestion. It's often used as a therapeutic tool to help people manage pain, anxiety, phobias, and other conditions by accessing their subconscious mind.",
+      "model": "gemini",
+      "timestamp": "2025-08-01T14:30:07.496Z",
+      "id": "1754058607496_oi8a6pt6y"
+    }
+  ]
+}

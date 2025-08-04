@@ -526,32 +526,13 @@ Return ONLY the full edited content. Do not include explanations, comments, or m
 
 IndexAndSearch: async ({ query, operation = "explain" }) => {
   const { execSync } = require('child_process');
-  const vscode = require('vscode');
   const path = require('path');
   const IndexingDir = path.join(__dirname, 'Indexing');
   
   if (!query) return 'Please provide a search query.';
   
-  // Get current workspace folder
-  const workspaceFolder = vscode.workspace.workspaceFolders?.[0]?.uri.fsPath;
-  if (!workspaceFolder) return 'No workspace folder is open.';
-  
-  console.log('[IndexAndSearch] Indexing directory:', workspaceFolder);
-  
   try {
-    // 1. Parse files in current directory
-    const indexScript = path.join(IndexingDir, 'index.cjs');
-    execSync(`node "${indexScript}" "${workspaceFolder}"`, { cwd: IndexingDir, encoding: 'utf8' });
-    
-    // 2. Generate embeddings
-    const genScript = path.join(IndexingDir, 'generateEmbedding.js');
-    execSync(`node "${genScript}"`, { cwd: IndexingDir, encoding: 'utf8' });
-    
-    // 3. Store in Faiss
-    const storeScript = path.join(IndexingDir, 'storeInFaiss.cjs');
-    execSync(`node "${storeScript}"`, { cwd: IndexingDir, encoding: 'utf8' });
-    
-    // 4. Search and get raw results
+    // Only search - indexing is done automatically
     const searchScript = path.join(IndexingDir, 'searchInFaiss.cjs');
     const searchResult = execSync(`node "${searchScript}" "${query}"`, {
       cwd: IndexingDir,
@@ -559,209 +540,33 @@ IndexAndSearch: async ({ query, operation = "explain" }) => {
       maxBuffer: 1024 * 1024
     });
     
-    // 5. Extract code snippets from search results
+    // Extract code snippets from search results
     const codeSnippets = extractCodeSnippets(searchResult);
     
     if (codeSnippets.length === 0) {
-      return `No matching code found for your query.\n\nRaw search result:\n${searchResult}`;
+      return `No matching code found for your query: "${query}"`;
     }
     
-    // 6. Create context-aware prompt based on operation type
-    let prompt;
-    
-    switch (operation.toLowerCase()) {
-      case 'refactor':
-        prompt = `
-You are a code refactoring expert. The user searched for: "${query}"
-
-Here are the matching code snippets from their codebase:
+    // Return formatted results for the AI model to process
+    return `Search Results for "${query}":
 
 ${codeSnippets.map((snippet, index) => `
---- Code Snippet ${index + 1} ---
+--- Result ${index + 1} ---
 File: ${snippet.file}
-Language: ${snippet.language}
 Function: ${snippet.name}
-Score: ${snippet.score}
+Language: ${snippet.language}
+Relevance Score: ${snippet.score}
 
+Code:
 \`\`\`${snippet.language.toLowerCase()}
 ${snippet.code}
 \`\`\`
 `).join('\n')}
 
-Please refactor these code snippets to improve:
-- Code readability and maintainability
-- Performance where applicable
-- Following best practices for ${codeSnippets[0]?.language || 'the language'}
-- Removing code duplication if any
-
-Provide the refactored code with explanations of what was improved.
-`;
-        break;
-        
-      case 'debug':
-        prompt = `
-You are a debugging expert. The user searched for: "${query}"
-
-Here are the matching code snippets that may contain bugs:
-
-${codeSnippets.map((snippet, index) => `
---- Code Snippet ${index + 1} ---
-File: ${snippet.file}
-Language: ${snippet.language}
-Function: ${snippet.name}
-
-\`\`\`${snippet.language.toLowerCase()}
-${snippet.code}
-\`\`\`
-`).join('\n')}
-
-Please analyze these code snippets and:
-1. Identify any potential bugs, errors, or issues
-2. Explain what could go wrong
-3. Provide corrected versions of the code
-4. Suggest improvements for robustness
-
-Focus on logic errors, potential runtime exceptions, and edge cases.
-`;
-        break;
-        
-      case 'optimize':
-        prompt = `
-You are a performance optimization expert. The user searched for: "${query}"
-
-Here are the matching code snippets to optimize:
-
-${codeSnippets.map((snippet, index) => `
---- Code Snippet ${index + 1} ---
-File: ${snippet.file}
-Language: ${snippet.language}
-Function: ${snippet.name}
-
-\`\`\`${snippet.language.toLowerCase()}
-${snippet.code}
-\`\`\`
-`).join('\n')}
-
-Please optimize these code snippets for:
-- Better time complexity
-- Reduced memory usage
-- Improved algorithms where applicable
-- Language-specific optimizations
-
-Provide optimized versions with performance analysis and explanations.
-`;
-        break;
-        
-      case 'test':
-        prompt = `
-You are a test writing expert. The user searched for: "${query}"
-
-Here are the matching code snippets that need tests:
-
-${codeSnippets.map((snippet, index) => `
---- Code Snippet ${index + 1} ---
-File: ${snippet.file}
-Language: ${snippet.language}
-Function: ${snippet.name}
-
-\`\`\`${snippet.language.toLowerCase()}
-${snippet.code}
-\`\`\`
-`).join('\n')}
-
-Please create comprehensive unit tests for these functions including:
-- Happy path test cases
-- Edge cases and boundary conditions
-- Error handling scenarios
-- Mock data where needed
-
-Use appropriate testing frameworks for ${codeSnippets[0]?.language || 'the language'}.
-`;
-        break;
-        
-      case 'document':
-        prompt = `
-You are a documentation expert. The user searched for: "${query}"
-
-Here are the matching code snippets that need documentation:
-
-${codeSnippets.map((snippet, index) => `
---- Code Snippet ${index + 1} ---
-File: ${snippet.file}
-Language: ${snippet.language}
-Function: ${snippet.name}
-
-\`\`\`${snippet.language.toLowerCase()}
-${snippet.code}
-\`\`\`
-`).join('\n')}
-
-Please provide comprehensive documentation including:
-- Function/method descriptions
-- Parameter explanations
-- Return value documentation
-- Usage examples
-- Any important notes or warnings
-
-Use appropriate documentation format for ${codeSnippets[0]?.language || 'the language'}.
-`;
-        break;
-        
-      case 'convert':
-        prompt = `
-You are a code conversion expert. The user searched for: "${query}"
-
-Here are the code snippets to work with:
-
-${codeSnippets.map((snippet, index) => `
---- Code Snippet ${index + 1} ---
-File: ${snippet.file}
-Language: ${snippet.language}
-Function: ${snippet.name}
-
-\`\`\`${snippet.language.toLowerCase()}
-${snippet.code}
-\`\`\`
-`).join('\n')}
-
-Please help convert or adapt these code snippets as requested. If no specific target is mentioned, provide equivalent implementations in popular languages or suggest modern alternatives.
-`;
-        break;
-        
-      default: // 'explain' or any other operation
-        prompt = `
-You are a code analysis expert. The user searched for: "${query}"
-
-Here are the matching code snippets from their codebase:
-
-${codeSnippets.map((snippet, index) => `
---- Code Snippet ${index + 1} ---
-File: ${snippet.file}
-Language: ${snippet.language}
-Function: ${snippet.name}
-Score: ${snippet.score}
-
-\`\`\`${snippet.language.toLowerCase()}
-${snippet.code}
-\`\`\`
-`).join('\n')}
-
-Please provide a comprehensive analysis including:
-1. What each function does
-2. How they relate to the search query
-3. Key algorithms or patterns used
-4. Potential improvements or concerns
-5. How these functions might work together
-
-Be thorough in your explanation and provide actionable insights.
-`;
-    }
-
-    const aiResponse = await askModel(prompt);
-    return aiResponse || 'Unable to process the code snippets.';
+Total matches found: ${codeSnippets.length}`;
     
   } catch (err) {
-    return `Error during indexing and search: ${err.message}\n${err.stdout?.toString() || ''}`;
+    return `Error during search: ${err.message}`;
   }
 }
 

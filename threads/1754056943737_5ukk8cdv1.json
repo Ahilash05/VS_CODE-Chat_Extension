@@ -1,0 +1,63 @@
+{
+  "id": "1754056943737_5ukk8cdv1",
+  "name": "Untitled Thread",
+  "created": "2025-08-01T14:02:23.737Z",
+  "messages": [
+    {
+      "type": "user",
+      "content": "hello there",
+      "model": "gemini",
+      "timestamp": "2025-08-01T14:02:35.578Z",
+      "id": "1754056955578_n4tf5okpl"
+    },
+    {
+      "type": "assistant",
+      "content": "Hello! How can I help you today?",
+      "model": "gemini",
+      "timestamp": "2025-08-01T14:02:38.263Z",
+      "id": "1754056958263_9gkmoq5wv"
+    },
+    {
+      "type": "user",
+      "content": "what is insertion sort",
+      "model": "gemini",
+      "timestamp": "2025-08-01T14:03:00.238Z",
+      "id": "1754056980238_w1gs5y8ho"
+    },
+    {
+      "type": "assistant",
+      "content": "Insertion sort is a simple sorting algorithm that builds the final sorted array (or list) one item at a time. It is much less efficient on large lists than more advanced algorithms such as quicksort, heapsort, or merge sort.\n\nHere's how it generally works:\n\n1.  **Iterate:** It iterates through the input array, taking one element at a time.\n2.  **Compare and Shift:** For each element, it compares it with the elements already sorted (which are to its left). If the current element is smaller than an element in the sorted part, it shifts the larger elements one position to the right to make space.\n3.  **Insert:** It then inserts the current element into its correct position in the sorted part of the array.\n\nThink of it like sorting a hand of playing cards: you pick up one card at a time and insert it into the correct position among the cards you've already sorted.\n\n**Key characteristics:**\n*   **Simple implementation:** Easy to understand and code.\n*   **Efficient for small data sets:** It performs well on small arrays or nearly sorted arrays.\n*   **In-place:** It sorts the array without requiring extra space (only a constant amount of auxiliary memory).\n*   **Stable:** It preserves the relative order of equal elements.\n\n**Time Complexity:**\n*   **Best Case:** O(n) (when the array is already sorted)\n*   **Average Case:** O(n^2)\n*   **Worst Case:** O(n^2) (when the array is sorted in reverse order)",
+      "model": "gemini",
+      "timestamp": "2025-08-01T14:03:19.137Z",
+      "id": "1754056999137_pq5vajbg6"
+    },
+    {
+      "type": "user",
+      "content": "can you create a file with insertion sort code in python",
+      "model": "gemini",
+      "timestamp": "2025-08-01T14:11:50.123Z",
+      "id": "1754057510123_l36e7l5pv"
+    },
+    {
+      "type": "assistant",
+      "content": " File created successfully: insertion_sort.py",
+      "model": "gemini",
+      "timestamp": "2025-08-01T14:11:55.631Z",
+      "id": "1754057515631_3jv038z79"
+    },
+    {
+      "type": "user",
+      "content": "can you edit it and also include a hello world function after the insertion sort",
+      "model": "gemini",
+      "timestamp": "2025-08-01T14:12:32.182Z",
+      "id": "1754057552182_c3f13h4sd"
+    },
+    {
+      "type": "assistant",
+      "content": "File edited successfully: insertion_sort.py (1 lines changed)",
+      "model": "gemini",
+      "timestamp": "2025-08-01T14:12:49.926Z",
+      "id": "1754057569926_n601xs664"
+    }
+  ]
+}

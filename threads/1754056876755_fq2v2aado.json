@@ -1,0 +1,21 @@
+{
+  "id": "1754056876755_fq2v2aado",
+  "name": "Untitled Thread",
+  "created": "2025-08-01T14:01:16.755Z",
+  "messages": [
+    {
+      "type": "user",
+      "content": "hello there",
+      "model": "gemini",
+      "timestamp": "2025-08-01T14:01:30.392Z",
+      "id": "1754056890392_8sjc5tijm"
+    },
+    {
+      "type": "assistant",
+      "content": "Hello! How can I help you today?",
+      "model": "gemini",
+      "timestamp": "2025-08-01T14:01:32.020Z",
+      "id": "1754056892020_9z5l5hgif"
+    }
+  ]
+}
