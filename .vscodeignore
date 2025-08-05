@@ -1,0 +1,41 @@
+# Dependencies
+node_modules/
+npm-debug.log
+yarn-error.log
+
+# Development files
+.vscode/
+.git/
+.gitignore
+README.md
+*.log
+
+# Build artifacts
+*.vsix
+dist/
+build/
+
+# Test files
+test/
+*.test.js
+*.spec.js
+
+# Documentation
+docs/
+*.md
+
+# IDE files
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Large data files
+chat_history.json
+global_chat_history.json
+threads/
+Indexing/ 

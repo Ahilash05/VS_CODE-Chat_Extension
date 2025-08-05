@@ -10,7 +10,7 @@ const MAP_FILE = 'token_index_map.json';
 const TOP_K = 3;
 
 //  Set local model path
-env.localModelPath = 'D:\\Moo_LLM\\Indexing\\models';
+env.localModelPath = 'D:\\vs_code_extension\\VS_CODE-Chat_Extension\\Indexing\\models';
 
 
 // Load token metadata map

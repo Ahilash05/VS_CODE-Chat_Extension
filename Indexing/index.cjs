@@ -98,4 +98,4 @@ files.forEach((filePath) => {
 });
 
 fs.writeFileSync('parsed_tokens.json', JSON.stringify(parsedTokenObjects, null, 2));
-console.log(`✅ Saved ${parsedTokenObjects.length} function tokens to parsed_tokens.json`);
+console.log(` Saved ${parsedTokenObjects.length} function tokens to parsed_tokens.json`);

@@ -1,8 +1,9 @@
 import fs from 'fs';
 import { pipeline, env } from '@xenova/transformers';
+import path from 'path';
 
 
-env.localModelPath = 'D:\\Moo_LLM\\Indexing\\models';
+env.localModelPath = 'D:\\vs_code_extension\\VS_CODE-Chat_Extension\\Indexing\\models';
 
 
 

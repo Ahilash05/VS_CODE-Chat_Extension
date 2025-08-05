@@ -9,34 +9,47 @@
 <!--HIGHLIGHT_CSS-->
 <!--HIGHLIGHT_JS-->
 
-
-
   <style>
+    :root {
+      /* Dark theme colors */
+      --bg-primary: #1a1a1a;
+      --bg-secondary: #2d2d2d;
+      --bg-tertiary: #404040;
+      --text-primary: #ffffff;
+      --text-secondary: #b0b0b0;
+      --accent-primary: #667eea;
+      --accent-secondary: #764ba2;
+      --border-color: #404040;
+      --shadow-color: rgba(0, 0, 0, 0.5);
+      --chat-bg: #242424;
+      --input-bg: #2d2d2d;
+    }
+
     body, html {
       margin: 0;
       padding: 0;
       height: 100%;
       font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-      background: linear-gradient(135deg, #000000 0%, #000000 100%);
-      color: #333;
+      background: linear-gradient(135deg, var(--bg-primary) 0%, #0f0f0f 100%);
+      color: var(--text-primary);
     }
 
     #chat-container {
       display: flex;
       height: 100vh;
-      background: rgba(0, 0, 0, 0.0);
+      background: rgba(45, 45, 45, 0.8);
       backdrop-filter: blur(10px);
       border-radius: 20px;
       margin: 10px;
       overflow: hidden;
-      box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+      box-shadow: 0 8px 32px var(--shadow-color);
     }
 
     #main-content {
       flex: 1;
       display: flex;
       flex-direction: column;
-      background: rgba(0, 0, 0, 0);
+      background: rgba(26, 26, 26, 0.6);
       margin: 15px;
       border-radius: 15px;
       overflow: hidden;
@@ -44,114 +57,118 @@
 
     #thread-controls {
       display: flex;
-      padding: 20px;
-      background: linear-gradient(135deg, #000000 0%, #000000 100%);
-      color: white;
-      gap: 12px;
+      padding: clamp(12px, 2vw, 20px);
+      background: linear-gradient(135deg, var(--bg-secondary) 0%, var(--bg-tertiary) 100%);
+      color: var(--text-primary);
+      gap: clamp(8px, 1.5vw, 12px);
       align-items: center;
+      flex-wrap: wrap;
     }
 
     #thread-controls label {
       font-weight: 600;
-      font-size: 14px;
+      font-size: clamp(12px, 2vw, 14px);
+      white-space: nowrap;
     }
 
     #thread-select {
       flex: 1;
-      padding: 10px 15px;
-      border: none;
+      min-width: 120px;
+      padding: clamp(8px, 1.5vw, 10px) clamp(12px, 2vw, 15px);
+      border: 1px solid var(--border-color);
       border-radius: 25px;
-      background: rgba(255, 255, 255, 0.2);
-      color: white;
-      font-size: 14px;
+      background: var(--input-bg);
+      color: var(--text-primary);
+      font-size: clamp(12px, 2vw, 14px);
       backdrop-filter: blur(5px);
     }
 
     #thread-select option {
-      background: #4a4a4a;
-      color: white;
+      background: var(--bg-secondary);
+      color: var(--text-primary);
     }
 
     #chat {
       flex: 1;
       overflow-y: auto;
-      padding: 20px;
-      background: #f8f9fa;
+      padding: clamp(12px, 2vw, 20px);
+      background: var(--chat-bg);
     }
 
     #input-panel {
-      width: 350px;
+      width: clamp(280px, 30vw, 350px);
       display: flex;
       flex-direction: column;
-      background: rgba(255, 255, 255, 0.95);
+      background: rgba(45, 45, 45, 0.95);
       margin: 15px 15px 15px 0;
       border-radius: 15px;
-      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+      box-shadow: 0 4px 20px var(--shadow-color);
+      border: 1px solid var(--border-color);
     }
 
     #input-header {
-      padding: 20px;
-      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      padding: clamp(15px, 2.5vw, 20px);
+      background: linear-gradient(135deg, var(--accent-primary) 0%, var(--accent-secondary) 100%);
       color: white;
       border-radius: 15px 15px 0 0;
     }
 
     #input-header h3 {
       margin: 0;
-      font-size: 18px;
+      font-size: clamp(16px, 2.5vw, 18px);
       font-weight: 600;
     }
 
     #input-area {
       display: flex;
       flex-direction: column;
-      padding: 20px;
-      gap: 15px;
+      padding: clamp(15px, 2.5vw, 20px);
+      gap: clamp(12px, 2vw, 15px);
     }
 
     #model-select {
-      padding: 12px 15px;
-      border: 2px solid #e9ecef;
+      padding: clamp(10px, 2vw, 12px) clamp(12px, 2vw, 15px);
+      border: 2px solid var(--border-color);
       border-radius: 10px;
-      background: white;
-      font-size: 14px;
-      color: #333;
+      background: var(--input-bg);
+      font-size: clamp(12px, 2vw, 14px);
+      color: var(--text-primary);
       transition: all 0.3s ease;
     }
 
     #model-select:focus {
       outline: none;
-      border-color: #667eea;
-      box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+      border-color: var(--accent-primary);
+      box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.2);
     }
 
     #message {
-      padding: 15px;
-      background: white;
-      color: #333;
-      border: 2px solid #e9ecef;
+      padding: clamp(12px, 2vw, 15px);
+      background: var(--input-bg);
+      color: var(--text-primary);
+      border: 2px solid var(--border-color);
       border-radius: 12px;
       resize: vertical;
-      min-height: 120px;
+      min-height: clamp(80px, 15vh, 120px);
       font-family: inherit;
-      font-size: 14px;
+      font-size: clamp(12px, 2vw, 14px);
       line-height: 1.5;
       transition: all 0.3s ease;
     }
 
     #message:focus {
       outline: none;
-      border-color: #667eea;
-      box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+      border-color: var(--accent-primary);
+      box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.2);
     }
 
     #message::placeholder {
-      color: #adb5bd;
+      color: var(--text-secondary);
     }
 
     .message {
-      margin: 15px 0;
-      padding: 20px;
+      margin: clamp(10px, 2vw, 15px) 0;
+      padding: clamp(15px, 2.5vw, 20px);
       border-radius: 15px;
       max-width: 80%;
       animation: fadeIn 0.3s ease;
@@ -163,41 +180,41 @@
     }
 
     .user {
-      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      background: linear-gradient(135deg, var(--accent-primary) 0%, var(--accent-secondary) 100%);
       color: white;
       margin-left: auto;
       box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);
     }
 
     .bot {
-      background: white;
-      color: #333;
+      background: var(--bg-secondary);
+      color: var(--text-primary);
       margin-right: auto;
-      border: 1px solid #e9ecef;
-      box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+      border: 1px solid var(--border-color);
+      box-shadow: 0 2px 10px var(--shadow-color);
     }
 
     .system {
       font-style: italic;
       text-align: center;
-      color: #6c757d;
-      background: rgba(108, 117, 125, 0.1);
+      color: var(--text-secondary);
+      background: rgba(176, 176, 176, 0.1);
       margin: 10px auto;
       max-width: 300px;
-      padding: 10px 20px;
+      padding: clamp(8px, 1.5vw, 10px) clamp(15px, 2.5vw, 20px);
       border-radius: 20px;
-      font-size: 14px;
+      font-size: clamp(12px, 2vw, 14px);
     }
 
     /* Enhanced Code Block Styling */
     .message pre {
-      background: #1e1e1e !important;
-      border: 1px solid #333;
+      background: #0d1117 !important;
+      border: 1px solid #30363d;
       border-radius: 12px;
-      padding: 20px;
-      margin: 15px 0;
+      padding: clamp(15px, 2.5vw, 20px);
+      margin: clamp(12px, 2vw, 15px) 0;
       overflow-x: auto;
-      box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+      box-shadow: 0 4px 15px rgba(0, 0, 0, 0.4);
       position: relative;
     }
 
@@ -210,31 +227,31 @@
       color: #fff;
       padding: 4px 8px;
       border-radius: 4px;
-      font-size: 12px;
+      font-size: clamp(10px, 1.5vw, 12px);
       font-weight: 500;
     }
 
     .message pre code {
       background: transparent !important;
-      color: #f8f8f2 !important;
+      color: #e6edf3 !important;
       font-family: 'Consolas', 'Monaco', 'Courier New', monospace;
-      font-size: 14px;
+      font-size: clamp(12px, 1.8vw, 14px);
       line-height: 1.6;
       padding: 0;
     }
 
     .message code:not(pre code) {
-      background: rgba(102, 126, 234, 0.1);
-      color: #667eea;
+      background: rgba(102, 126, 234, 0.2);
+      color: var(--accent-primary);
       padding: 2px 6px;
       border-radius: 4px;
       font-family: 'Consolas', 'Monaco', 'Courier New', monospace;
-      font-size: 13px;
+      font-size: clamp(11px, 1.8vw, 13px);
     }
 
     .bot code:not(pre code) {
-      background: rgba(102, 126, 234, 0.1);
-      color: #667eea;
+      background: rgba(102, 126, 234, 0.2);
+      color: var(--accent-primary);
     }
 
     .user code:not(pre code) {
@@ -243,16 +260,17 @@
     }
 
     button {
-      padding: 12px 20px;
-      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      padding: clamp(10px, 2vw, 12px) clamp(15px, 2.5vw, 20px);
+      background: linear-gradient(135deg, var(--accent-primary) 0%, var(--accent-secondary) 100%);
       color: white;
       border: none;
       border-radius: 25px;
       cursor: pointer;
       font-weight: 600;
-      font-size: 14px;
+      font-size: clamp(12px, 2vw, 14px);
       transition: all 0.3s ease;
       box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);
+      white-space: nowrap;
     }
 
     button:hover {
@@ -264,18 +282,18 @@
       transform: translateY(0);
     }
 
-    /* Scrollbar Styling */
+    /* Scrollbar Styling for Dark Theme */
     ::-webkit-scrollbar {
       width: 8px;
     }
 
     ::-webkit-scrollbar-track {
-      background: rgba(0, 0, 0, 0.1);
+      background: var(--bg-secondary);
       border-radius: 4px;
     }
 
     ::-webkit-scrollbar-thumb {
-      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      background: linear-gradient(135deg, var(--accent-primary) 0%, var(--accent-secondary) 100%);
       border-radius: 4px;
     }
 
@@ -288,6 +306,7 @@
       #chat-container {
         flex-direction: column;
         margin: 5px;
+        border-radius: 15px;
       }
       
       #input-panel {
@@ -298,6 +317,45 @@
       .message {
         max-width: 95%;
       }
+
+      #thread-controls {
+        padding: 10px;
+        gap: 8px;
+      }
+
+      button {
+        padding: 8px 12px;
+        font-size: 12px;
+      }
+    }
+
+    @media (max-width: 480px) {
+      #chat-container {
+        margin: 2px;
+        border-radius: 10px;
+      }
+
+      #main-content {
+        margin: 8px;
+      }
+
+      #input-panel {
+        margin: 0 8px 8px 8px;
+      }
+
+      #thread-controls {
+        flex-direction: column;
+        align-items: stretch;
+      }
+
+      #thread-select {
+        margin-bottom: 8px;
+      }
+
+      .message {
+        padding: 12px;
+        font-size: 13px;
+      }
     }
 
     /* Loading Animation */
@@ -307,7 +365,7 @@
       height: 20px;
       border: 3px solid rgba(102, 126, 234, 0.3);
       border-radius: 50%;
-      border-top-color: #667eea;
+      border-top-color: var(--accent-primary);
       animation: spin 1s ease-in-out infinite;
     }
 
